@@ -22,7 +22,7 @@
 		<module>ssoserver</module>
 		<module>ssoclient</module>
 		<module>ssoresourceserver</module>
-		<module>ssomanagement</module>
+		<!-- <module>ssomanagement</module> -->
 	</modules>
 
 	<properties>
