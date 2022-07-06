@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example # postgres/example
+    volumes:
+      - ${PWD}/postgresql/script:/docker-entrypoint-initdb.d
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 127.0.0.1:8120:8080
+
+  compiler:
+    image: wingzzz2003/codeserver_ubuntu:4.5.0
+    restart: always
+    volumes:
+      - ${PWD}/4.5.0/.config/code-server/config.yaml:/root/.config/code-server/config.yaml
+      - ${PWD}/4.5.0/.local/share/code-server/User/settings.json:/root/.local/share/code-server/User/settings.json
+      - ${PWD}:/root/external
+    ports:
+      - "8080-8082:8080-8082"
+      - "8090:8090"
+      - "9000:9000"
+      - "9001:9001"
+    entrypoint: code-server
+    environment:
+      - TZ=Asia/Macau
+
+#  node1:
+#    image: maven-xserver # or maven:3.6.0-jdk-11 if you run without IDE
+#    volumes:
+#      - appdata:/root/:Z
+#    command: bash
+#    stdin_open: true
+#    tty: true
+#    working_dir: /root
+#  node2:
+#    image: maven-xserver # or maven:3.6.0-jdk-11 if you run without IDE
+#    volumes:
+#      - appdata:/root/:Z
+#    command: bash
+#    stdin_open: true
+#    tty: true
+#    working_dir: /root
+#
+#  loadbalance:
+#    image: nginx:stable
+#    restart: always
+#    depends_on:
+#      - node1
+#      - node2
+#    volumes:
+#      - ./site.conf:/etc/nginx/conf.d/default.conf
+#    ports:
+#      - 8081:8081

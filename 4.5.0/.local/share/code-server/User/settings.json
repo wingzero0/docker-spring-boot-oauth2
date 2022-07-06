@@ -1,0 +1,17 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "java.configuration.runtimes": [
+        {
+          "name": "JavaSE-11",
+          "path": "/usr/lib/jvm/java-11-openjdk-amd64/bin/java",
+          "default": true
+        },
+        {
+          "name": "JavaSE-17",
+          "path": "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+        },
+    ],
+    "redhat.telemetry.enabled": false,
+    "editor.multiCursorModifier": "ctrlCmd",
+    "terminal.integrated.enableMultiLinePasteWarning": false
+}

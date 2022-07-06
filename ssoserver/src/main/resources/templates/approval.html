@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="zh-Hant">
+<head>
+</head>
+<body>
+<p>Customize</p><p th:text="${clientId}"></p>
+<form id="confirmationForm" name="confirmationForm" th:action="@{/oauth/authorize}" method="post">
+    <input name="user_oauth_approval" value="true" type="hidden"/>
+    <div th:each="scope : ${scopesRefine.keySet()}">
+        <p th:text="#{'page.approval.' + ${scope}}">scope name</p>
+        <label th:text="#{page.approval.approve}">approve</label>
+        <input type="radio" th:name="${scope}" value="true" th:checked="('true' == ${scopesRefine['scope']} )" />
+        <label th:text="#{page.approval.deny}">deny</label>
+        <input type="radio" th:name="${scope}" value="false" th:checked="('true' != ${scopesRefine['scope']} )"/>
+    </div>
+    <label><input name="authorize" value="Authorize" type="submit"/></label>
+</form>
+</body>
+</html>

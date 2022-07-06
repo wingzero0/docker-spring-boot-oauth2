@@ -1,0 +1,6 @@
+.project
+.settings/
+.vscode/
+ssoentity/bin/
+/logs/
+ssoparent.iml
