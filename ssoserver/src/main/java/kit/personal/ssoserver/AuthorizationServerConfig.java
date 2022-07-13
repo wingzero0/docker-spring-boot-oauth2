@@ -28,6 +28,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
@@ -37,21 +38,35 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import kit.personal.ssoserver.jose.Jwks;
 
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {
+	private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
 
 	@Bean
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+		OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer<>();
+		authorizationServerConfigurer
+				.authorizationEndpoint(
+						authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
+
+		RequestMatcher endpointsMatcher = authorizationServerConfigurer
+				.getEndpointsMatcher();
 		// @formatter:off
 		http
+			.requestMatcher(endpointsMatcher)
+			.authorizeRequests(authorizeRequests ->
+				authorizeRequests.anyRequest().authenticated()
+			)
+			.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
 			.exceptionHandling(exceptions ->
 				exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-			);
+			)
+			.apply(authorizationServerConfigurer);
 		// @formatter:on
 		return http.build();
 	}
@@ -83,10 +98,8 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	public ProviderSettings providerSettings(
-		@Value("${application.issuser}") String issuserUrl
-	) {
+			@Value("${application.issuser}") String issuserUrl) {
 		return ProviderSettings.builder().issuer(issuserUrl).build();
-		// return ProviderSettings.builder().issuer("http://localhost:8081/auth").build();
 	}
 
 }

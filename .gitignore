@@ -4,3 +4,5 @@
 ssoentity/bin/
 /logs/
 ssoparent.iml
+/spring-authorization-server/
+/auth-server-sample/
