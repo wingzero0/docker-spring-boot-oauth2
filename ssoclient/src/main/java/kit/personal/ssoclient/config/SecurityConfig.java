@@ -86,22 +86,6 @@ public class SecurityConfig {
             // Delegate to the default implementation for loading a user
             OAuth2User oAuth2User = delegate.loadUser(userRequest);
             return oAuth2User;
-            // TODO call resource server to get full role
-            // OAuth2AccessToken accessToken = userRequest.getAccessToken();
-            
-            // Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-            // Map<String, Object> stringObjectMap = oAuth2User.getAttributes();
-            // List<Object> objList = (List<Object>)stringObjectMap.get("authorities");
-            // for(Object obj: objList){
-            //     Map<String, String> innerMap = (Map<String, String>) obj;
-            //     if (innerMap.get("authority").contains("user")){
-            //         mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_CUSTOM"));
-            //     }
-            //     mappedAuthorities.add(new SimpleGrantedAuthority(innerMap.get("authority")));
-            // }
-            // oAuth2User = new DefaultOAuth2User(mappedAuthorities, oAuth2User.getAttributes(), "name");
-
-            // return oAuth2User;
         };
     }
 
@@ -116,17 +100,19 @@ public class SecurityConfig {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
             mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC"));
 
-            String messages = this.webClient
+            LOG.debug("oidcUserName:" + oidcUser.getName());
+
+            String[] messages = this.webClient
 				.get()
-				.uri(this.roleUri)
+				.uri(this.roleUri + oidcUser.getName())
 				.attributes(clientRegistrationId("messaging-client-client-credentials"))
 				.retrieve()
-				.bodyToMono(String.class)
+				.bodyToMono(String[].class)
 				.block();
-            LOG.debug("ROLE:" + messages);
-            // for (String message: messages) {
-            //     LOG.debug("ROLE:" + message);
-            // }
+            for (String message: messages) {
+                LOG.debug("ROLE:" + message);
+                mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
+            }
             
             // TODO
             // 1) Fetch the authority information from the protected resource using accessToken

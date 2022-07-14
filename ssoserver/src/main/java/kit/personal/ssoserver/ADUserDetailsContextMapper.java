@@ -33,7 +33,7 @@ public class ADUserDetailsContextMapper implements UserDetailsContextMapper {
         List<AppUserRole> roleList = roleRepository.findAllByUsername(username);
         Set<GrantedAuthority> grantedAuthorities = new HashSet<GrantedAuthority>();
         for (AppUserRole role : roleList) {
-            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getAppId() + "_" + role.getAppRole()));
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getAppClientId() + "_" + role.getUserRole()));
         }
 
         grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));

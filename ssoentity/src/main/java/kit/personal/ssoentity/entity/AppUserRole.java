@@ -13,10 +13,9 @@ public class AppUserRole {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private BigInteger id;
-	// TODO consider add foreign key to AppUser.username, or change reference to AppUser.id?
 	private String username;
-	private String appId;
-	private String appRole;
+	private String userRole;
+	private String appClientId;
 	private Date lastModifiedDate;
 	private String lastModifiedBy;
 
@@ -38,22 +37,20 @@ public class AppUserRole {
 		return this;
 	}
 
-	public String getAppId() {
-		return appId;
+	public String getAppClientId() {
+		return appClientId;
 	}
 
-	public AppUserRole setAppId(String appId) {
-		this.appId = appId;
-		return this;
+	public void setAppClientId(String appClientId) {
+		this.appClientId = appClientId;
 	}
 
-	public String getAppRole() {
-		return appRole;
+	public String getUserRole() {
+		return userRole;
 	}
 
-	public AppUserRole setAppRole(String role) {
-		this.appRole = role;
-		return this;
+	public void setUserRole(String userRole) {
+		this.userRole = userRole;
 	}
 
 	public Date getLastModifiedDate() {

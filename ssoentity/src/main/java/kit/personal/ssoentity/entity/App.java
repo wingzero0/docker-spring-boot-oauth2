@@ -2,143 +2,100 @@ package kit.personal.ssoentity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
-@Entity(name = "oauth_client_details")
+@Entity(name = "oauth2_registered_client")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class App {
 	@Id
+	private String id;
 	private String clientId;
-	private String resourceIds;
+	private LocalDateTime clientIdIssuedAt;
 	private String clientSecret;
-	private String scope;
-	private String authorizedGrantTypes;
-	private String webServerRedirectUri;
-	private String authorities;
-	private Integer accessTokenValidity;
-	private Integer refreshTokenValidity;
-	private String additionalInformation;
-	private String autoapprove;
-	private String displayName;
-	@Transient
-	private boolean updateClientSecret;
+	private LocalDateTime clientSecretExpiresAt;
+	private String clientName;
+	private String clientAuthenticationMethods;
+	private String authorizationGrantTypes;
+	private String redirectUris;
+	private String scopes;
+	private String clientSettings;
+	private String tokenSettings;
 
-	public boolean isUpdateClientSecret() {
-		return this.updateClientSecret;
+	public String getId() {
+		return id;
 	}
-
-	public App setUpdateClientSecret(boolean updateClientSecret) {
-		this.updateClientSecret = updateClientSecret;
-		return this;
+	public void setId(String id) {
+		this.id = id;
 	}
-
 	public String getClientId() {
 		return clientId;
 	}
-
-	public App setClientId(String clientId) {
+	public void setClientId(String clientId) {
 		this.clientId = clientId;
-		return this;
 	}
-
-	public String getResourceIds() {
-		return resourceIds;
+	public LocalDateTime getClientIdIssuedAt() {
+		return clientIdIssuedAt;
 	}
-
-	public App setResourceIds(String resourceIds) {
-		this.resourceIds = resourceIds;
-		return this;
+	public void setClientIdIssuedAt(LocalDateTime clientIdIssuedAt) {
+		this.clientIdIssuedAt = clientIdIssuedAt;
 	}
-
 	public String getClientSecret() {
 		return clientSecret;
 	}
-
-	public App setClientSecret(String clientSecret) {
+	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
-		return this;
+	}
+	public LocalDateTime getClientSecretExpiresAt() {
+		return clientSecretExpiresAt;
+	}
+	public void setClientSecretExpiresAt(LocalDateTime clientSecretExpiresAt) {
+		this.clientSecretExpiresAt = clientSecretExpiresAt;
+	}
+	public String getClientName() {
+		return clientName;
+	}
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+	public String getClientAuthenticationMethods() {
+		return clientAuthenticationMethods;
+	}
+	public void setClientAuthenticationMethods(String clientAuthenticationMethods) {
+		this.clientAuthenticationMethods = clientAuthenticationMethods;
+	}
+	public String getAuthorizationGrantTypes() {
+		return authorizationGrantTypes;
+	}
+	public void setAuthorizationGrantTypes(String authorizationGrantTypes) {
+		this.authorizationGrantTypes = authorizationGrantTypes;
+	}
+	public String getRedirectUris() {
+		return redirectUris;
+	}
+	public void setRedirectUris(String redirectUris) {
+		this.redirectUris = redirectUris;
+	}
+	public String getScopes() {
+		return scopes;
+	}
+	public void setScopes(String scopes) {
+		this.scopes = scopes;
+	}
+	public String getClientSettings() {
+		return clientSettings;
+	}
+	public void setClientSettings(String clientSettings) {
+		this.clientSettings = clientSettings;
+	}
+	public String getTokenSettings() {
+		return tokenSettings;
+	}
+	public void setTokenSettings(String tokenSettings) {
+		this.tokenSettings = tokenSettings;
 	}
 
-	public String getScope() {
-		return scope;
-	}
-
-	public App setScope(String scope) {
-		this.scope = scope;
-		return this;
-	}
-
-	public String getAuthorizedGrantTypes() {
-		return authorizedGrantTypes;
-	}
-
-	public App setAuthorizedGrantTypes(String authorizedGrantTypes) {
-		this.authorizedGrantTypes = authorizedGrantTypes;
-		return this;
-	}
-
-	public String getWebServerRedirectUri() {
-		return webServerRedirectUri;
-	}
-
-	public App setWebServerRedirectUri(String webServerRedirectUri) {
-		this.webServerRedirectUri = webServerRedirectUri;
-		return this;
-	}
-
-	public String getAuthorities() {
-		return authorities;
-	}
-
-	public App setAuthorities(String authorities) {
-		this.authorities = authorities;
-		return this;
-	}
-
-	public Integer getAccessTokenValidity() {
-		return accessTokenValidity;
-	}
-
-	public App setAccessTokenValidity(Integer accessTokenValidity) {
-		this.accessTokenValidity = accessTokenValidity;
-		return this;
-	}
-
-	public Integer getRefreshTokenValidity() {
-		return refreshTokenValidity;
-	}
-
-	public App setRefreshTokenValidity(Integer refreshTokenValidity) {
-		this.refreshTokenValidity = refreshTokenValidity;
-		return this;
-	}
-
-	public String getAdditionalInformation() {
-		return additionalInformation;
-	}
-
-	public App setAdditionalInformation(String additionalInformation) {
-		this.additionalInformation = additionalInformation;
-		return this;
-	}
-
-	public String getAutoapprove() {
-		return autoapprove;
-	}
-
-	public App setAutoapprove(String autoapprove) {
-		this.autoapprove = autoapprove;
-		return this;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public App setDisplayName(String displayName) {
-		this.displayName = displayName;
-		return this;
-	}
+	
 }
