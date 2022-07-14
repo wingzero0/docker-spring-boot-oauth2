@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,13 +26,22 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+
 
 @EnableWebSecurity
 public class SecurityConfig {
     Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
+
+    @Value("${resource.server.role.uri}")
+    private String roleUri;
+    @Autowired
+    private WebClient webClient;
+
     // @Bean
 	// WebSecurityCustomizer webSecurityCustomizer() {
 	// 	return (web) -> web.ignoring().antMatchers("/webjars/**");
@@ -105,6 +116,18 @@ public class SecurityConfig {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
             mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC"));
 
+            String messages = this.webClient
+				.get()
+				.uri(this.roleUri)
+				.attributes(clientRegistrationId("messaging-client-client-credentials"))
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+            LOG.debug("ROLE:" + messages);
+            // for (String message: messages) {
+            //     LOG.debug("ROLE:" + message);
+            // }
+            
             // TODO
             // 1) Fetch the authority information from the protected resource using accessToken
             // 2) Map the authority information to one or more GrantedAuthority's and add it to mappedAuthorities
