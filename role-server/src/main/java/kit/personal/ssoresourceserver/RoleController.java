@@ -22,8 +22,7 @@ public class RoleController {
     private AppUserRoleRepository appUserRoleRepo;
 
     @GetMapping("/appRole")
-    public List<AppUserRole> getAllRoleInApp(Principal principal,
-            @PathVariable(name = "username") String username) {
+    public List<AppUserRole> getAllRoleInApp(Principal principal) {
         return appUserRoleRepo.findAllByAppClientId(principal.getName());
     }
 
