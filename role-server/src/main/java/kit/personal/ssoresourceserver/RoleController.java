@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class RoleController {
-    @SuppressWarnings("unused")
     private static Logger LOG = LoggerFactory.getLogger(RoleController.class);
 
     @Autowired

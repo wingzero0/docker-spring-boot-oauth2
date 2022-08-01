@@ -23,7 +23,7 @@
 		<module>ssoclient</module>
 		<module>ssoresourceserver</module>
 		<module>role-server</module>
-		<!-- <module>ssomanagement</module> -->
+		<module>ssomanagement</module>
 	</modules>
 
 	<properties>

@@ -1,5 +1,6 @@
 target/
-bin/
+spa2/
+src/main/resources/static/
 !.mvn/wrapper/maven-wrapper.jar
 src/main/filters-*.properties
 !src/main/filters-example.properties
