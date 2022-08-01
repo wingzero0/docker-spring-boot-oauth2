@@ -1,8 +1,6 @@
 package kit.personal.ssoclient.config;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -27,7 +25,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
@@ -114,10 +111,6 @@ public class SecurityConfig {
                 mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
             }
             
-            // TODO
-            // 1) Fetch the authority information from the protected resource using accessToken
-            // 2) Map the authority information to one or more GrantedAuthority's and add it to mappedAuthorities
-            // 3) Create a copy of oidcUser but use the mappedAuthorities instead
             oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
 
             return oidcUser;

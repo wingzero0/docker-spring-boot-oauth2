@@ -2,11 +2,11 @@ package kit.personal.ssomanagement.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -19,24 +19,32 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
+
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-@Configuration
+import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
     private static Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Value("${application.disable_api_auth}")
     private boolean isDisableAPIAuth;
     @Value("${spring.security.oauth2.client.registration.my-client-2.client-id}")
     private String ssoClientId;
+    @Value("${resource.server.role.uri}")
+    private String roleUri;
+    @Autowired
+    private WebClient webClient;
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
+    // @formatter:off
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         if (isDisableAPIAuth){
             http.authorizeRequests().antMatchers("/**").permitAll();
             http.csrf().disable();
@@ -50,41 +58,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/js/about**.js").permitAll()
                     .anyRequest().authenticated()
                 .and()
-                .oauth2Login()
-                    .loginPage("/oauth2/authorization/my-client-2")
-                    .userInfoEndpoint()
-                    .userService(this.userService())
-                    .oidcUserService(this.oidcUserService())
+                .oauth2Login(oauth2Login ->{
+                    oauth2Login
+                        .loginPage("/loginPage")
+                        .userInfoEndpoint()
+                        .userService(this.userService())
+                        .oidcUserService(this.oidcUserService());
+                })
+                .oauth2Client(withDefaults());
         ;
-        http.logout().logoutUrl("/logoutPage").logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-        ;
+        http.logout()
+            .logoutUrl("/logoutPage")
+            .logoutSuccessUrl("/")
+            .invalidateHttpSession(true)
+            .deleteCookies("JSESSIONID");
+        return http.build();
     }
+    // @formatter:on
 
-    private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
+	private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
         return (userRequest) -> {
             // Delegate to the default implementation for loading a user
             OAuth2User oAuth2User = delegate.loadUser(userRequest);
-            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-            Map<String, Object> stringObjectMap = oAuth2User.getAttributes();
-            List<Object> objList = (List<Object>)stringObjectMap.get("authorities");
-            for(Object obj: objList){
-                Map<String, String> innerMap = (Map<String, String>) obj;
-                String checkedRole =  innerMap.get("authority").toUpperCase();
-                String currentAppAdmin = (ssoClientId + "_ADMIN").toUpperCase();
-                if (checkedRole.contains(currentAppAdmin)){
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                }
-                if (checkedRole.contains("_ADMIN")){
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_APP_ADMIN"));
-                }
-                mappedAuthorities.add(new SimpleGrantedAuthority(checkedRole));
-            }
-            oAuth2User = new DefaultOAuth2User(mappedAuthorities, oAuth2User.getAttributes(), "name");
-
             return oAuth2User;
         };
     }
@@ -93,17 +90,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         final OidcUserService delegate = new OidcUserService();
 
         return (userRequest) -> {
-            // Delegate to the default implementation for loading a user
             OidcUser oidcUser = delegate.loadUser(userRequest);
-
-            OAuth2AccessToken accessToken = userRequest.getAccessToken();
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-            mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_GOOGLE"));
+            mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC"));
 
-            // TODO
-            // 1) Fetch the authority information from the protected resource using accessToken
-            // 2) Map the authority information to one or more GrantedAuthority's and add it to mappedAuthorities
-            // 3) Create a copy of oidcUser but use the mappedAuthorities instead
+            LOG.debug("oidcUserName:" + oidcUser.getName());
+
+            String[] messages = this.webClient
+				.get()
+				.uri(this.roleUri + oidcUser.getName())
+				.attributes(clientRegistrationId("messaging-client-client-credentials"))
+				.retrieve()
+				.bodyToMono(String[].class)
+				.block();
+            for (String message: messages) {
+                LOG.debug("ROLE:" + message);
+                mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
+            }
+
+            // TODO implement cross app checking, get other_client_app_admin
+            
             oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
 
             return oidcUser;
