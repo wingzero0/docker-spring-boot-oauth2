@@ -1,0 +1,15 @@
+{
+  "name": "admin-lte-src",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postbuild": "rm -rf ../src/main/resources/static/vendor/admin-lte/ && mkdir ../src/main/resources/static/vendor/admin-lte/ && cp -r node_modules/admin-lte/dist ../src/main/resources/static/vendor/admin-lte/dist && cp -r node_modules/admin-lte/plugins ../src/main/resources/static/vendor/admin-lte/plugins"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "admin-lte": "^3.2.0"
+  }
+}

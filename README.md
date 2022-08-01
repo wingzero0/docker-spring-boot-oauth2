@@ -16,6 +16,10 @@ visit localhost:9001 for IDE interface, login password "admin"
 ## running app in docker
 running ssoserver at localhost:8081/auth
 ```bash
+cd ssoserver/npmLib
+npm install
+npm postbuild
+cd ../../
 cp ssoserver/src/main/filters-example.properties ssoserver/src/main/filters-dev.properties
 mvn clean compile spring-boot:run -pl ssoserver -am
 ```
