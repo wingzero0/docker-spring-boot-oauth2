@@ -2,7 +2,7 @@ package kit.personal.ssomanagement.controller;
 
 import kit.personal.ssoentity.entity.AppUserRole;
 import kit.personal.ssoentity.repo.AppUserRoleRepository;
-import kit.personal.ssomanagement.security.LoginInfo;
+import kit.personal.ssomanagement.config.LoginInfo;
 import kit.personal.ssomanagement.utility.LoginChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,10 +1,8 @@
 package kit.personal.ssomanagement.controller;
 
-import kit.personal.ssoentity.entity.ActingRole;
 import kit.personal.ssoentity.entity.App;
 import kit.personal.ssoentity.entity.AppRequest;
 import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.ActingRoleRepository;
 import kit.personal.ssoentity.repo.AppRepository;
 import kit.personal.ssoentity.repo.AppUserRoleRepository;
 import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
@@ -20,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +33,11 @@ public class AppApiController {
 	@Autowired
 	AppUserRoleRepository appUserRoleRepository;
 	@Autowired
-	ActingRoleRepository actingRoleRepository;
-	@Autowired
 	LoginChecker loginChecker;
 	@SuppressWarnings("unused")
 	private static Logger LOG = LoggerFactory.getLogger(AppApiController.class);
+	@Autowired
+	RegisteredClientRepository registeredClientRepository;
 
 	@GetMapping( value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -52,13 +52,7 @@ public class AppApiController {
 			return appRepository.findAllBy(PageRequest.of(page, limit, sort));
 		}
 
-		Date today = this.getDateTruncateTime(new Date());
-		List<ActingRole> actingRoleList = actingRoleRepository.findAllByPkUsernameAndDateAndAppRoleIgnoreCase(
-				loginChecker.getLoginName(auth), today, "ADMIN");
 		Set<String> appIds = new HashSet<>();
-		for (ActingRole actingRole : actingRoleList){
-			appIds.add(actingRole.getAppId());
-		}
 
 		List<AppUserRole> appUserRoleList = appUserRoleRepository.findAllByUsernameAndUserRoleIgnoreCase(
 				loginChecker.getLoginName(auth), "ADMIN");
@@ -69,15 +63,15 @@ public class AppApiController {
 		return appRepository.findAllByClientIdIn(PageRequest.of(page, limit, sort), appIds);
 	}
 
-	private Date getDateTruncateTime(Date dateObject){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(dateObject);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return new Date(cal.getTimeInMillis());
-	}
+	// private Date getDateTruncateTime(Date dateObject){
+	// 	Calendar cal = Calendar.getInstance();
+	// 	cal.setTime(dateObject);
+	// 	cal.set(Calendar.HOUR_OF_DAY, 0);
+	// 	cal.set(Calendar.MINUTE, 0);
+	// 	cal.set(Calendar.SECOND, 0);
+	// 	cal.set(Calendar.MILLISECOND, 0);
+	// 	return new Date(cal.getTimeInMillis());
+	// }
 
 	@GetMapping( value = "/app/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -122,5 +116,11 @@ public class AppApiController {
 		}
 		appRepository.save(app);
 		return app;
+	}
+
+	@GetMapping( value = "/appr", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public RegisteredClient getRegisteredClient(){
+		return registeredClientRepository.findByClientId("messaging-client2");
 	}
 }

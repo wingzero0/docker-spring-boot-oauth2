@@ -1,4 +1,4 @@
-package kit.personal.ssomanagement.security;
+package kit.personal.ssomanagement.config;
 
 
 import org.slf4j.Logger;
