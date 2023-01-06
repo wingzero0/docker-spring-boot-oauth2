@@ -24,16 +24,16 @@ cp ssoserver/src/main/filters-example.properties ssoserver/src/main/filters-dev.
 mvn clean compile spring-boot:run -pl ssoserver -am
 ```
 
-running ssoclient at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost.
+running role-server at localhost:8082/res
+```bash
+cp role-server/src/main/filters-example.properties role-server/src/main/filters-dev.properties
+mvn clean compile spring-boot:run -pl role-server -am
+```
+
+running ssoclient at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost. it will input username:password at localhost:8081/auth, and check role through localhost:8082/res
 ```bash
 cp ssoclient/src/main/filters-example.properties ssoclient/src/main/filters-dev.properties
 mvn clean compile spring-boot:run -pl ssoclient -am
-```
-
-running ssoresourceserver at localhost:8082/res
-```bash
-cp ssoresourceserver/src/main/filters-example.properties ssoresourceserver/src/main/filters-dev.properties
-mvn clean compile spring-boot:run -pl ssoresourceserver -am
 ```
 
 ## testing command
@@ -65,7 +65,7 @@ generate access token by client_credentials or authorization_code. password auth
 # TODO write example about authorization_code
 ```
 
-use access token to visit resource server
+use access token to visit resource server (you need to stop role-server and run with ssoresourceserver)
 ```bash
 curl -v http://localhost:8082/res/user/read -H "Authorization: Bearer xxxx"
 ```

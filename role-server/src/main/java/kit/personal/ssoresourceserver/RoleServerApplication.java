@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "kit.personal.ssoentity.repo")
 @EntityScan(basePackages = "kit.personal.ssoentity.entity")
-public class SsoResourceServerApplication extends SpringBootServletInitializer {
+public class RoleServerApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SsoResourceServerApplication.class, args);
+		SpringApplication.run(RoleServerApplication.class, args);
 	}
 }

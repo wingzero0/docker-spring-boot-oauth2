@@ -14,10 +14,8 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,8 +33,6 @@ public class SecurityConfig {
 
     @Value("${application.disable_api_auth}")
     private boolean isDisableAPIAuth;
-    @Value("${spring.security.oauth2.client.registration.my-client-2.client-id}")
-    private String ssoClientId;
     @Value("${resource.server.role.uri}")
     private String roleUri;
     @Autowired
@@ -49,8 +45,8 @@ public class SecurityConfig {
             http.authorizeRequests().antMatchers("/**").permitAll();
             http.csrf().disable();
             LOG.debug("disable auth");
-        }
-        http.authorizeRequests()
+        } else {
+            http.authorizeRequests()
                     .antMatchers("/api/csrf-token").hasAnyRole("ADMIN", "APP_ADMIN", "USER")
                     .antMatchers("/api/**").hasAnyRole("ADMIN", "APP_ADMIN")
                     .antMatchers("/selfServiceApi/**").hasRole("USER")
@@ -66,12 +62,13 @@ public class SecurityConfig {
                         .oidcUserService(this.oidcUserService());
                 })
                 .oauth2Client(withDefaults());
-        ;
-        http.logout()
-            .logoutUrl("/logoutPage")
-            .logoutSuccessUrl("/")
-            .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID");
+            ;
+            http.logout()
+                .logoutUrl("/logoutPage")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID");
+        }
         return http.build();
     }
     // @formatter:on

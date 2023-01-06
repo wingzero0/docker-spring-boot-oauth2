@@ -39,7 +39,7 @@ import java.util.*;
 
 @Controller
 public class HomeController{
-    @Value("${spring.security.oauth2.client.provider.springssoserver.baseurl}")
+    @Value("${spring.security.oauth2.client.provider.spring.issuer-uri}")
     private String ssoserverBaseURL;
 
     @Value("${application.disable_api_auth}")
