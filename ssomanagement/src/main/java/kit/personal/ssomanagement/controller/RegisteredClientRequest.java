@@ -6,6 +6,7 @@ import java.util.Set;
 public class RegisteredClientRequest {
     private String clientId;
     private String clientSecret;
+    private String clientName;
     private Set<String> redirectUris = new HashSet<>();
     private Set<String> scopes = new HashSet<>();
 
@@ -41,6 +42,12 @@ public class RegisteredClientRequest {
         this.scopes = scopes;
     }
 
+    public String getClientName() {
+        return clientName;
+    }
 
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
 
 }
