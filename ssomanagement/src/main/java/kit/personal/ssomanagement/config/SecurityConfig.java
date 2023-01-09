@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -19,7 +21,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
-
 
 import java.util.HashSet;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class SecurityConfig {
     }
     // @formatter:on
 
-	private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
+    private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
         return (userRequest) -> {
@@ -94,22 +95,27 @@ public class SecurityConfig {
             LOG.debug("oidcUserName:" + oidcUser.getName());
 
             String[] messages = this.webClient
-				.get()
-				.uri(this.roleUri + oidcUser.getName())
-				.attributes(clientRegistrationId("messaging-client-client-credentials"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
-            for (String message: messages) {
+                    .get()
+                    .uri(this.roleUri + oidcUser.getName())
+                    .attributes(clientRegistrationId("messaging-client-client-credentials"))
+                    .retrieve()
+                    .bodyToMono(String[].class)
+                    .block();
+            for (String message : messages) {
                 LOG.debug("ROLE:" + message);
                 mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
             }
 
             // TODO implement cross app checking, get other_client_app_admin
-            
+
             oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
 
             return oidcUser;
         };
+    }
+
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

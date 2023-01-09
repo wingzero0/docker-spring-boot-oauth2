@@ -6,6 +6,7 @@ import kit.personal.ssoentity.entity.AppUserRole;
 import kit.personal.ssoentity.repo.AppRepository;
 import kit.personal.ssoentity.repo.AppUserRoleRepository;
 import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
+import kit.personal.ssomanagement.controller.exception.WrongParameterException;
 import kit.personal.ssomanagement.utility.LoginChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient.Builder;
+import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,17 +44,18 @@ public class AppApiController {
 	private static Logger LOG = LoggerFactory.getLogger(AppApiController.class);
 	@Autowired
 	RegisteredClientRepository registeredClientRepository;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-	@GetMapping( value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Page<App> getAppList(
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer limit,
-			Authentication auth
-	){
+			Authentication auth) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "clientId");
 
-		if (loginChecker.isReachableRole("ROLE_ADMIN", auth)){
+		if (loginChecker.isReachableRole("ROLE_ADMIN", auth)) {
 			return appRepository.findAllBy(PageRequest.of(page, limit, sort));
 		}
 
@@ -57,28 +64,28 @@ public class AppApiController {
 		List<AppUserRole> appUserRoleList = appUserRoleRepository.findAllByUsernameAndUserRoleIgnoreCase(
 				loginChecker.getLoginName(auth), "ADMIN");
 
-		for (AppUserRole appUserRole : appUserRoleList){
+		for (AppUserRole appUserRole : appUserRoleList) {
 			appIds.add(appUserRole.getAppClientId());
 		}
 		return appRepository.findAllByClientIdIn(PageRequest.of(page, limit, sort), appIds);
 	}
 
 	// private Date getDateTruncateTime(Date dateObject){
-	// 	Calendar cal = Calendar.getInstance();
-	// 	cal.setTime(dateObject);
-	// 	cal.set(Calendar.HOUR_OF_DAY, 0);
-	// 	cal.set(Calendar.MINUTE, 0);
-	// 	cal.set(Calendar.SECOND, 0);
-	// 	cal.set(Calendar.MILLISECOND, 0);
-	// 	return new Date(cal.getTimeInMillis());
+	// Calendar cal = Calendar.getInstance();
+	// cal.setTime(dateObject);
+	// cal.set(Calendar.HOUR_OF_DAY, 0);
+	// cal.set(Calendar.MINUTE, 0);
+	// cal.set(Calendar.SECOND, 0);
+	// cal.set(Calendar.MILLISECOND, 0);
+	// return new Date(cal.getTimeInMillis());
 	// }
 
-	@GetMapping( value = "/app/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/app/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public App getApp(
-			@PathVariable(value = "clientId") String clientId
-	){
-		App app = appRepository.findById(clientId).orElseThrow(()-> new ResourceNotFoundException("client id not found"));
+			@PathVariable(value = "clientId") String clientId) {
+		App app = appRepository.findById(clientId)
+				.orElseThrow(() -> new ResourceNotFoundException("client id not found"));
 		return app;
 	}
 
@@ -88,11 +95,10 @@ public class AppApiController {
 		return appUserRoleRepository.findAllByAppClientId(clientId);
 	}
 
-	@PostMapping( value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public App createApp(
-			@RequestBody AppRequest appRequest
-	){
+			@RequestBody AppRequest appRequest) {
 		PasswordEncoder encoder = new BCryptPasswordEncoder();
 		App app = new App();
 		BeanUtils.copyProperties(appRequest, app);
@@ -101,26 +107,55 @@ public class AppApiController {
 		return app;
 	}
 
-	@PutMapping( value = "/app/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/app/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public App updateApp(
 			@RequestBody AppRequest appRequest,
-			@PathVariable(value = "id") String id
-	){
+			@PathVariable(value = "id") String id) {
 		PasswordEncoder encoder = new BCryptPasswordEncoder();
-		App app = appRepository.findById(id).orElseThrow(()-> new RuntimeException("app id not found"));
-		
+		App app = appRepository.findById(id).orElseThrow(() -> new RuntimeException("app id not found"));
+
 		BeanUtils.copyProperties(appRequest, app, "clientSecret");
-		if (appRequest.isUpdateClientSecret()){
+		if (appRequest.isUpdateClientSecret()) {
 			app.setClientSecret(encoder.encode(appRequest.getClientSecret()));
 		}
 		appRepository.save(app);
 		return app;
 	}
 
-	@GetMapping( value = "/appr", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/appr", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public RegisteredClient getRegisteredClient(){
+	public RegisteredClient getRegisteredClient() {
 		return registeredClientRepository.findByClientId("messaging-client2");
+	}
+
+	@PostMapping(value = "/appr", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public RegisteredClient createRegisteredClient(@RequestBody RegisteredClientRequest registeredClientRequest) {
+		RegisteredClient existingClient = registeredClientRepository.findByClientId(registeredClientRequest.getClientId());
+		if (existingClient!=null) {
+			throw new WrongParameterException("client id existed:" + registeredClientRequest.getClientId());
+		}
+		Builder builder = RegisteredClient.withId(UUID.randomUUID().toString());
+		builder = builder
+				.clientId(registeredClientRequest.getClientId())
+				.clientSecret(passwordEncoder.encode(registeredClientRequest.getClientSecret()))
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS);
+		for (String redirectUri : registeredClientRequest.getRedirectUris()) {
+			builder = builder.redirectUri(redirectUri);
+		}
+
+		builder = builder.scope(OidcScopes.OPENID); // this one no consent
+		for (String scope : registeredClientRequest.getScopes()) {
+			builder = builder.scope(scope); // all require consent
+		}
+		builder = builder.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build());
+
+		RegisteredClient registeredClient = builder.build();
+		registeredClientRepository.save(registeredClient);
+		return registeredClient;
 	}
 }
