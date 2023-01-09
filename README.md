@@ -18,7 +18,7 @@ running ssoserver at localhost:8081/auth
 ```bash
 cd ssoserver/npmLib
 npm install
-npm postbuild
+npm run postbuild
 cd ../../
 cp ssoserver/src/main/filters-example.properties ssoserver/src/main/filters-dev.properties
 mvn clean compile spring-boot:run -pl ssoserver -am
@@ -27,13 +27,13 @@ mvn clean compile spring-boot:run -pl ssoserver -am
 running role-server at localhost:8082/res
 ```bash
 cp role-server/src/main/filters-example.properties role-server/src/main/filters-dev.properties
-mvn clean compile spring-boot:run -pl role-server -am
+mvn spring-boot:run -pl role-server -am
 ```
 
 running ssoclient at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost. it will input username:password at localhost:8081/auth, and check role through localhost:8082/res
 ```bash
 cp ssoclient/src/main/filters-example.properties ssoclient/src/main/filters-dev.properties
-mvn clean compile spring-boot:run -pl ssoclient -am
+mvn spring-boot:run -pl ssoclient -am
 ```
 
 ## testing command
