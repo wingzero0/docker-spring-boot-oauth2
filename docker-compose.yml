@@ -17,11 +17,11 @@ services:
       - 8120:8080
 
   compiler:
-    image: wingzzz2003/codeserver_ubuntu:4.9.3
+    image: wingzzz2003/codeserver_ubuntu:4.9.1.java17
     restart: always
     volumes:
-      - ./4.9.3/.config/code-server/config.yaml:/root/.config/code-server/config.yaml
-      - ./4.9.3/.local/share/code-server/User/settings.json:/root/.local/share/code-server/User/settings.json
+      - ./4.9.1/.config/code-server/config.yaml:/root/.config/code-server/config.yaml
+      - ./4.9.1/.local/share/code-server/User/settings.json:/root/.local/share/code-server/User/settings.json
       - m2cache:/root/.m2/
       - ./:/root/external
     ports:

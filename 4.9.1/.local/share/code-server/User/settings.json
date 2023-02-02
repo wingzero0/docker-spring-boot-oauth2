@@ -4,11 +4,11 @@
         {
           "name": "JavaSE-11",
           "path": "/usr/lib/jvm/java-11-openjdk-amd64/",
-          "default": true
         },
         {
           "name": "JavaSE-17",
           "path": "/usr/lib/jvm/java-17-openjdk-amd64/",
+          "default": true
         },
     ],
     "redhat.telemetry.enabled": false
