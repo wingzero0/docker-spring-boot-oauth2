@@ -1,6 +1,6 @@
 package kit.personal.ssoentity.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 @Entity
 public class AppUser implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
     @JsonView(EntityJsonView.PUBLIC_VIEW.class)
     private String username;

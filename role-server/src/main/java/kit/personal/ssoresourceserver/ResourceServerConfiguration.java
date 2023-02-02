@@ -22,10 +22,10 @@ public class ResourceServerConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         try {
             // @formatter:off
-            http.authorizeRequests(
+            http.authorizeHttpRequests(
                     authorizeRequests -> authorizeRequests
-                        .antMatchers("/api/appRole").hasAuthority("SCOPE_app_role")
-                        .antMatchers("/api/appRole/**").hasAuthority("SCOPE_app_role")
+                        .requestMatchers("/api/appRole").hasAuthority("SCOPE_app_role")
+                        .requestMatchers("/api/appRole/**").hasAuthority("SCOPE_app_role")
                         .anyRequest().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2
                     .opaqueToken(token -> token.introspectionUri(checkTokenUri)

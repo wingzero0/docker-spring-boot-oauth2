@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 // import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     @Autowired
     @Qualifier("userDetailsServiceImpl")
@@ -35,10 +37,10 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests(authorizeRequests -> {
-            authorizeRequests.antMatchers("/vendor/**").permitAll();
-            authorizeRequests.antMatchers("/js/**").permitAll();
-            authorizeRequests.antMatchers("/css/**").permitAll();
+        http.authorizeHttpRequests(authorizeRequests -> {
+            authorizeRequests.requestMatchers("/vendor/**").permitAll();
+            authorizeRequests.requestMatchers("/js/**").permitAll();
+            authorizeRequests.requestMatchers("/css/**").permitAll();
             authorizeRequests.anyRequest().authenticated();
         })
         // .formLogin(withDefaults());

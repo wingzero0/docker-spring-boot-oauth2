@@ -45,12 +45,12 @@ public class SecurityConfig {
     @Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.authorizeRequests(authorizeRequests ->{
+			.authorizeHttpRequests(authorizeRequests ->{
                 authorizeRequests
-                    .antMatchers("/usercustom").hasRole("CUSTOM")
-                    .antMatchers("/usergoogle").hasRole("GOOGLE")
-                    .antMatchers("/login/**").permitAll()
-                    .antMatchers("/loginPage").permitAll();
+                    .requestMatchers("/usercustom").hasRole("CUSTOM")
+                    .requestMatchers("/usergoogle").hasRole("GOOGLE")
+                    .requestMatchers("/login/**").permitAll()
+                    .requestMatchers("/loginPage").permitAll();
                 authorizeRequests.anyRequest().authenticated();
             })
             .oauth2Login(oauth2Login ->{
