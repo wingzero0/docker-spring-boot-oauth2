@@ -22,6 +22,7 @@ services:
     volumes:
       - ./4.9.3/.config/code-server/config.yaml:/root/.config/code-server/config.yaml
       - ./4.9.3/.local/share/code-server/User/settings.json:/root/.local/share/code-server/User/settings.json
+      - m2cache:/root/.m2/
       - ./:/root/external
     ports:
       - "8080-8082:8080-8082"
@@ -32,6 +33,8 @@ services:
     environment:
       - TZ=Asia/Macau
 
+volumes:
+  m2cache:
 #  node1:
 #    image: maven-xserver # or maven:3.6.0-jdk-11 if you run without IDE
 #    volumes:
