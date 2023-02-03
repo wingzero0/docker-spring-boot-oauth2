@@ -78,12 +78,12 @@ revoke access token and refresh_token
 ```bash
 curl -v -X POST http://localhost:8081/auth/oauth2/revoke \
  -H "Authorization: Basic bWVzc2FnaW5nLWNsaWVudDI6c2VjcmV0" \
- -F token_type=access_token \
+ -F token_type_hint=access_token \
  -F token=xxx
 
 curl -v -X POST http://localhost:8081/auth/oauth2/revoke \
  -H "Authorization: Basic bWVzc2FnaW5nLWNsaWVudDI6c2VjcmV0" \
- -F token_type=refresh_token \
+ -F token_type_hint=refresh_token \
  -F token=xxx
 ```
 

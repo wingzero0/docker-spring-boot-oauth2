@@ -11,18 +11,17 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import reactor.core.publisher.Mono;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -70,13 +69,16 @@ public class HomeController {
                 .connectTimeout(Duration.ofSeconds(20))
                 .build();
 
+        String clientIdAndSecret = authorizedClient.getClientRegistration().getClientId() + ":" + authorizedClient.getClientRegistration().getClientSecret();
+        String clientIdAndSecretBase64 = Base64.getEncoder().encodeToString(clientIdAndSecret.getBytes());
+        LOG.debug("clientIdAndSecret:" + clientIdAndSecret);
+        LOG.debug("clientIdAndSecretBase64:" + clientIdAndSecretBase64);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ssoserverBaseURL + "/oauth2/revoke")) // TODO update according to new api, with header
-                                                                      // base64(client_id:secret), token=xxx and
-                                                                      // token_type=access_token
+                .uri(URI.create(ssoserverBaseURL + "/oauth2/revoke"))
                 .timeout(Duration.ofMinutes(2))
-                .header("Authorization", "Bearer " + authorizedClient.getAccessToken().getTokenValue())
-                .POST(BodyPublishers.ofString(""))
+                .header("Authorization", "Basic " + clientIdAndSecretBase64)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(BodyPublishers.ofString("token=" + authorizedClient.getAccessToken() + "&token_type_hint=access_token"))
                 .build();
         client.sendAsync(request, BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
