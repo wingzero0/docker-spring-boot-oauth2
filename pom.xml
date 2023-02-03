@@ -5,7 +5,7 @@
 
 	<groupId>kit.personal.sso</groupId>
 	<artifactId>ssoparent</artifactId>
-	<version>0.11.0</version>
+	<version>0.12.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>ssoparent</name>
@@ -22,7 +22,7 @@
 		<module>ssoserver</module>
 		<module>ssoclient</module>
 		<module>role-server</module>
-		<!-- <module>ssomanagement</module> -->
+		<module>ssomanagement</module>
 	</modules>
 
 	<properties>
@@ -36,7 +36,7 @@
 			<dependency>
 				<groupId>kit.personal.sso</groupId>
 				<artifactId>ssoentity</artifactId>
-				<version>0.11.0</version>
+				<version>0.12.0-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

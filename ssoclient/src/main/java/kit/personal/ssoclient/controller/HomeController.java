@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.AbstractOAuth2Token;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -63,13 +64,13 @@ public class HomeController {
     public void revokeToken(OAuth2AuthenticationToken authentication, HttpServletRequest logoutRequest,
             HttpServletResponse response) {
         OAuth2AuthorizedClient authorizedClient = this.getAuthorizedClient(authentication);
-        // String ret = "token:" + authorizedClient.getAccessToken().getTokenValue();
         HttpClient client = HttpClient.newBuilder()
                 .followRedirects(Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(20))
                 .build();
 
-        String clientIdAndSecret = authorizedClient.getClientRegistration().getClientId() + ":" + authorizedClient.getClientRegistration().getClientSecret();
+        String clientIdAndSecret = authorizedClient.getClientRegistration().getClientId() + ":"
+                + authorizedClient.getClientRegistration().getClientSecret();
         String clientIdAndSecretBase64 = Base64.getEncoder().encodeToString(clientIdAndSecret.getBytes());
         LOG.debug("clientIdAndSecret:" + clientIdAndSecret);
         LOG.debug("clientIdAndSecretBase64:" + clientIdAndSecretBase64);
@@ -78,7 +79,8 @@ public class HomeController {
                 .timeout(Duration.ofMinutes(2))
                 .header("Authorization", "Basic " + clientIdAndSecretBase64)
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(BodyPublishers.ofString("token=" + authorizedClient.getAccessToken() + "&token_type_hint=access_token"))
+                .POST(BodyPublishers
+                        .ofString("token=" + authorizedClient.getAccessToken() + "&token_type_hint=access_token"))
                 .build();
         client.sendAsync(request, BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -114,17 +116,26 @@ public class HomeController {
     @ResponseBody
     public String userinfo(OAuth2AuthenticationToken authentication) {
         OAuth2AuthorizedClient authorizedClient = this.getAuthorizedClient(authentication);
-        String ret = "accessToken:" + authorizedClient.getAccessToken().getTokenValue();
-        ret += ", refreshToken:" + authorizedClient.getRefreshToken().getTokenValue();
+        if (authorizedClient == null) {
+            return "authorizedClient is null, maybe not login with oauth?";
+        }
+        String ret = "accessToken:" + this.getTokenValue(authorizedClient.getAccessToken());
+        ret += ", refreshToken:" + this.getTokenValue(authorizedClient.getRefreshToken());
         ret += ", userName:" + authentication.getName();
         ret += ", clientName:" + authorizedClient.getClientRegistration().getClientName();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         for (GrantedAuthority authority : auth.getAuthorities()) {
             ret += ", authority:" + authority.getAuthority();
         }
-        // DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
-        // ret += ", oidcUser" + oidcUser.getFullName();
         return ret;
+    }
+
+    private String getTokenValue(AbstractOAuth2Token token) {
+        if (token != null) {
+            return token.getTokenValue();
+        } else {
+            return null;
+        }
     }
 
     @GetMapping("/usercustom")
@@ -142,8 +153,6 @@ public class HomeController {
     }
 
     private OAuth2AuthorizedClient getAuthorizedClient(OAuth2AuthenticationToken authentication) {
-        // TODO return with web client
-        // return null;
         return this.authorizedClientService.loadAuthorizedClient(
                 authentication.getAuthorizedClientRegistrationId(), authentication.getName());
     }

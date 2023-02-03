@@ -38,11 +38,6 @@ public class SecurityConfig {
     @Autowired
     private WebClient webClient;
 
-    // @Bean
-	// WebSecurityCustomizer webSecurityCustomizer() {
-	// 	return (web) -> web.ignoring().antMatchers("/webjars/**");
-	// }
-
     // @formatter:off
     @Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     private static Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
@@ -39,40 +41,40 @@ public class SecurityConfig {
     @Autowired
     private WebClient webClient;
 
-    // @formatter:off
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        if (isDisableAPIAuth){
-            http.authorizeRequests().antMatchers("/**").permitAll();
+        if (isDisableAPIAuth) {
+            http.authorizeHttpRequests(authorizeRequests -> {
+                authorizeRequests
+                        .requestMatchers("/**").permitAll();
+            });
             http.csrf().disable();
             LOG.debug("disable auth");
         } else {
-            http.authorizeRequests()
-                    .antMatchers("/api/csrf-token").hasAnyRole("ADMIN", "APP_ADMIN", "USER")
-                    .antMatchers("/api/**").hasAnyRole("ADMIN", "APP_ADMIN")
-                    .antMatchers("/selfServiceApi/**").hasRole("USER")
-                    .antMatchers("/loginPage").permitAll()
-                    .antMatchers("/js/about**.js").permitAll()
-                    .anyRequest().authenticated()
-                .and()
-                .oauth2Login(oauth2Login ->{
-                    oauth2Login
+            http.authorizeHttpRequests(authorizeRequests -> {
+                authorizeRequests
+                        .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "APP_ADMIN", "USER")
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "APP_ADMIN")
+                        .requestMatchers("/selfServiceApi/**").hasRole("USER")
+                        .requestMatchers("/loginPage").permitAll()
+                        .requestMatchers("/js/about**.js").permitAll();
+                authorizeRequests.anyRequest().authenticated();
+            }).oauth2Login(oauth2Login -> {
+                oauth2Login
                         .loginPage("/loginPage")
                         .userInfoEndpoint()
                         .userService(this.userService())
                         .oidcUserService(this.oidcUserService());
-                })
-                .oauth2Client(withDefaults());
-            ;
+            }).oauth2Client(withDefaults());
+
             http.logout()
-                .logoutUrl("/logoutPage")
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID");
+                    .logoutUrl("/logoutPage")
+                    .logoutSuccessUrl("/")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID");
         }
         return http.build();
     }
-    // @formatter:on
 
     private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();

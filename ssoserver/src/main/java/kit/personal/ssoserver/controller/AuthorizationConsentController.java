@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import kit.personal.ssoserver.controller.exception.ResourceNotFoundException;
+
 @Controller
 public class AuthorizationConsentController {
 	private final RegisteredClientRepository registeredClientRepository;
@@ -40,6 +42,9 @@ public class AuthorizationConsentController {
 		Set<String> scopesToApprove = new HashSet<>();
 		Set<String> previouslyApprovedScopes = new HashSet<>();
 		RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
+		if (registeredClient == null) {
+			throw new ResourceNotFoundException("clientId Not found:" + clientId);
+		}
 		OAuth2AuthorizationConsent currentAuthorizationConsent =
 				this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
 		Set<String> authorizedScopes;
