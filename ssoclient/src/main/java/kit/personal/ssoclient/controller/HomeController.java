@@ -11,34 +11,42 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Map;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import reactor.core.publisher.Mono;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 @Controller
-public class HomeController{
+public class HomeController {
     @Value("${spring.security.oauth2.client.provider.spring.issuer-uri}")
     private String ssoserverBaseURL;
 
     @Autowired
     private OAuth2AuthorizedClientService authorizedClientService;
+    @Autowired
+    private WebClient webClient;
     private static Logger LOG = LoggerFactory.getLogger(HomeController.class);
-
 
     @GetMapping("/")
     @ResponseBody
@@ -53,23 +61,26 @@ public class HomeController{
     }
 
     @GetMapping("/logoutPage")
-    public void revokeToken(OAuth2AuthenticationToken authentication, HttpServletRequest logoutRequest, HttpServletResponse response) {
+    public void revokeToken(OAuth2AuthenticationToken authentication, HttpServletRequest logoutRequest,
+            HttpServletResponse response) {
         OAuth2AuthorizedClient authorizedClient = this.getAuthorizedClient(authentication);
         // String ret = "token:" + authorizedClient.getAccessToken().getTokenValue();
         HttpClient client = HttpClient.newBuilder()
-            .followRedirects(Redirect.NORMAL)
-            .connectTimeout(Duration.ofSeconds(20))
-            .build();
+                .followRedirects(Redirect.NORMAL)
+                .connectTimeout(Duration.ofSeconds(20))
+                .build();
 
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(ssoserverBaseURL + "/oauth2/revoke")) // TODO update according to new api, with header base64(client_id:secret), token=xxx and token_type=access_token
-            .timeout(Duration.ofMinutes(2))
-            .header("Authorization", "Bearer " + authorizedClient.getAccessToken().getTokenValue())
-            .POST(BodyPublishers.ofString(""))
-            .build();
+                .uri(URI.create(ssoserverBaseURL + "/oauth2/revoke")) // TODO update according to new api, with header
+                                                                      // base64(client_id:secret), token=xxx and
+                                                                      // token_type=access_token
+                .timeout(Duration.ofMinutes(2))
+                .header("Authorization", "Bearer " + authorizedClient.getAccessToken().getTokenValue())
+                .POST(BodyPublishers.ofString(""))
+                .build();
         client.sendAsync(request, BodyHandlers.ofString())
-            .thenApply(HttpResponse::body)
-            .thenAccept(System.out::println);
+                .thenApply(HttpResponse::body)
+                .thenAccept(System.out::println);
 
         try {
             logoutRequest.logout();
@@ -78,17 +89,19 @@ public class HomeController{
         }
 
         try {
-            String redirectURL = logoutRequest.getScheme() + "://" + logoutRequest.getServerName() + ":" + logoutRequest.getServerPort() + logoutRequest.getContextPath();
+            String redirectURL = logoutRequest.getScheme() + "://" + logoutRequest.getServerName() + ":"
+                    + logoutRequest.getServerPort() + logoutRequest.getContextPath();
             LOG.debug("redirect URL:" + redirectURL);
             LOG.debug("encode redirect URL:" + URLEncoder.encode(redirectURL, StandardCharsets.UTF_8));
 
-            response.sendRedirect(ssoserverBaseURL + "/exit?callbackURL="+ URLEncoder.encode(redirectURL, StandardCharsets.UTF_8));
+            response.sendRedirect(
+                    ssoserverBaseURL + "/exit?callbackURL=" + URLEncoder.encode(redirectURL, StandardCharsets.UTF_8));
             return;
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-            try{
+            try {
                 response.sendRedirect("/");
-            } catch (IOException secondE ){
+            } catch (IOException secondE) {
                 secondE.printStackTrace();
             }
             return;
@@ -98,18 +111,17 @@ public class HomeController{
     @GetMapping("/userinfo")
     @ResponseBody
     public String userinfo(OAuth2AuthenticationToken authentication) {
-
         OAuth2AuthorizedClient authorizedClient = this.getAuthorizedClient(authentication);
         String ret = "accessToken:" + authorizedClient.getAccessToken().getTokenValue();
         ret += ", refreshToken:" + authorizedClient.getRefreshToken().getTokenValue();
         ret += ", userName:" + authentication.getName();
         ret += ", clientName:" + authorizedClient.getClientRegistration().getClientName();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        for (GrantedAuthority authority : auth.getAuthorities()){
+        for (GrantedAuthority authority : auth.getAuthorities()) {
             ret += ", authority:" + authority.getAuthority();
         }
-        //DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
-        //ret += ", oidcUser" + oidcUser.getFullName();
+        // DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
+        // ret += ", oidcUser" + oidcUser.getFullName();
         return ret;
     }
 
@@ -132,5 +144,29 @@ public class HomeController{
         // return null;
         return this.authorizedClientService.loadAuthorizedClient(
                 authentication.getAuthorizedClientRegistrationId(), authentication.getName());
+    }
+
+    @GetMapping(value = "/testMessageScope")
+    @ResponseBody
+    public Map<String, String> authorizationCodeGrant(
+            @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code") OAuth2AuthorizedClient authorizedClient) {
+
+        String messages = this.webClient
+                .get()
+                .uri("http://localhost:8082/res/api/testScopeRead")
+                .attributes(oauth2AuthorizedClient(authorizedClient))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        String messages2 = this.webClient
+                .get()
+                .uri("http://localhost:8082/res/api/testScopeWrite")
+                .attributes(oauth2AuthorizedClient(authorizedClient))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        Map<String, String> ret = Map.of("message.read", messages, "message.write", messages2);
+        return ret;
     }
 }

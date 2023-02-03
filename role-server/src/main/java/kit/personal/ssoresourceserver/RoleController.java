@@ -9,7 +9,9 @@ import kit.personal.ssoentity.entity.AppUserRole;
 import kit.personal.ssoentity.repo.AppUserRoleRepository;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,6 +21,24 @@ public class RoleController {
 
     @Autowired
     private AppUserRoleRepository appUserRoleRepo;
+
+    @GetMapping("/testScopeRead")
+    @ResponseBody
+    public Map<String, Object> user(Principal principal) {
+        Map<String, Object> ret = new HashMap<> ();
+        ret.put("principal", principal);
+        ret.put("message", "it works");
+        return ret;
+    }
+
+    @GetMapping("/testScopeWrite")
+    @ResponseBody
+    public Map<String, Object> testDB(Principal principal) {
+        Map<String, Object> ret = new HashMap<> ();
+        ret.put("principal", principal);
+        ret.put("message", "it works");
+        return ret;
+    }
 
     @GetMapping("/appRole")
     public List<AppUserRole> getAllRoleInApp(Principal principal) {

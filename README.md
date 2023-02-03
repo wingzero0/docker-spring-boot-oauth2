@@ -65,9 +65,13 @@ generate access token by client_credentials or authorization_code. password auth
 # TODO write example about authorization_code
 ```
 
-use access token to visit resource server (you need to stop role-server and run with ssoresourceserver)
+use access token to visit resource server
 ```bash
-curl -v http://localhost:8082/res/user/read -H "Authorization: Bearer xxxx"
+# if your token has scope message.read, you could try this
+curl -v http://localhost:8082/res/api/testScopeRead -H "Authorization: Bearer xxxx"
+# if your token has scope app_role
+curl -v http://localhost:8082/res/api/app_role -H "Authorization: Bearer xxxx"
+# you will get 403 if scope is wrong
 ```
 
 revoke access token and refresh_token
@@ -106,7 +110,7 @@ curl -v -X POST \
 	-F token=xxx
 
 # response will look like below.
-# {"active":true,"sub":"messaging-client","aud":["messaging-client"],"nbf":1651041699,"scope":"message.read message.write","iss":"http://localhost:9000","exp":1651041999,"iat":1651041699,"client_id":"messaging-client","token_type":"Bearer"}
+# {"active":true,"sub":"messaging-client2","aud":["messaging-client2"],"nbf":1675400912,"scope":"app_role","iss":"http://localhost:8081/auth","exp":1675401212,"iat":1675400912,"client_id":"messaging-client2","token_type":"Bearer"}
 ```
 
 ### test code grant
