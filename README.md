@@ -11,10 +11,10 @@ linux container
     $> docker-composer stop # stop env
     $> docker-composer down # delete env
 
-visit localhost:9001 for IDE interface, login password "admin"
+visit localhost:9000 for IDE interface, login password "admin"
 
 ## running app in docker
-running ssoserver at localhost:8081/auth
+running ssoserver (it is an authenication server) at localhost:8081/auth
 ```bash
 cd ssoserver/npmLib
 npm install
@@ -24,13 +24,13 @@ cp ssoserver/src/main/filters-example.properties ssoserver/src/main/filters-dev.
 mvn clean compile spring-boot:run -pl ssoserver -am
 ```
 
-running role-server at localhost:8082/res
+running role-server (it is a resource server) at localhost:8082/res
 ```bash
 cp role-server/src/main/filters-example.properties role-server/src/main/filters-dev.properties
 mvn spring-boot:run -pl role-server -am
 ```
 
-running ssoclient at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost. it will input username:password at localhost:8081/auth, and check role through localhost:8082/res
+running ssoclient (it is a client server, with server side authentication) at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost. it will input username:password at localhost:8081/auth, and check role through localhost:8082/res
 ```bash
 cp ssoclient/src/main/filters-example.properties ssoclient/src/main/filters-dev.properties
 mvn spring-boot:run -pl ssoclient -am
