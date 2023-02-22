@@ -1,14 +1,14 @@
 package kit.personal.ssomanagement.controller;
 
-import kit.personal.ssoentity.entity.App;
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppRepository;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
-import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
-import kit.personal.ssomanagement.controller.exception.WrongParameterException;
-import kit.personal.ssomanagement.utility.LoginChecker;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,13 +20,26 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient.Builder;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
+import kit.personal.ssoentity.entity.App;
+import kit.personal.ssoentity.entity.AppUserRole;
+import kit.personal.ssoentity.repo.AppRepository;
+import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
+import kit.personal.ssomanagement.controller.exception.WrongParameterException;
+import kit.personal.ssomanagement.utility.LoginChecker;
 
 @Controller
 @RequestMapping(value = "/api")
@@ -46,14 +59,17 @@ public class AppApiController {
 
 	@GetMapping(value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Page<App> getAppList(
+	public Page<RegisteredClientResponse> getAppList(
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer limit,
 			Authentication auth) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "clientId");
 
 		if (loginChecker.isReachableRole("ROLE_ADMIN", auth)) {
-			return appRepository.findAllBy(PageRequest.of(page, limit, sort));
+			Page<App> appResult = appRepository.findAllBy(PageRequest.of(page, limit, sort));
+			return appResult.map((app) -> {
+				return this.convertRegisteredClient(app.getRegisteredClient());
+			});
 		}
 
 		Set<String> appIds = new HashSet<>();
@@ -64,41 +80,51 @@ public class AppApiController {
 		for (AppUserRole appUserRole : appUserRoleList) {
 			appIds.add(appUserRole.getAppClientId());
 		}
-		return appRepository.findAllByClientIdIn(PageRequest.of(page, limit, sort), appIds);
+
+		Page<App> filteredAppResult = appRepository.findAllByClientIdIn(PageRequest.of(page, limit, sort), appIds);
+		return filteredAppResult.map((app) -> {
+			return this.convertRegisteredClient(app.getRegisteredClient());
+		});
 	}
 
-	@GetMapping(value = "/app/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public App getApp(
-			@PathVariable(value = "clientId") String clientId) {
-		App app = appRepository.findById(clientId)
-				.orElseThrow(() -> new ResourceNotFoundException("client id not found"));
-		return app;
-	}
-
-	@GetMapping(value = "/app/{clientId}/role", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public List<AppUserRole> getAppRole(@PathVariable(value = "clientId") String clientId) {
-		return appUserRoleRepository.findAllByAppClientId(clientId);
+	private RegisteredClientResponse convertRegisteredClient(RegisteredClient client) {
+		RegisteredClientResponse response = new RegisteredClientResponse();
+		BeanUtils.copyProperties(client, response);
+		response.getAuthorizationGrantTypes().addAll(
+				client.getAuthorizationGrantTypes().stream().map((grantType) -> grantType.getValue()).toList());
+		response.getClientAuthenticationMethods().addAll(
+				client.getClientAuthenticationMethods().stream().map((method) -> method.getValue()).toList());
+		return response;
 	}
 
 	@PostMapping(value = "/app", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public RegisteredClient createRegisteredClient(@RequestBody RegisteredClientRequest registeredClientRequest) {
+	public RegisteredClientResponse createRegisteredClient(
+			@RequestBody RegisteredClientRequest registeredClientRequest) {
 		RegisteredClient existingClient = registeredClientRepository
 				.findByClientId(registeredClientRequest.getClientId());
 		if (existingClient != null) {
 			throw new WrongParameterException("client id existed:" + registeredClientRequest.getClientId());
 		}
 		Builder builder = RegisteredClient.withId(UUID.randomUUID().toString());
+		Date now = new Date();
 		builder = builder
 				.clientId(registeredClientRequest.getClientId())
+				.clientIdIssuedAt(now.toInstant())
 				.clientSecret(passwordEncoder.encode(registeredClientRequest.getClientSecret()))
-				.clientName(registeredClientRequest.getClientName())
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS);
+				.clientSecretExpiresAt(registeredClientRequest.getClientSecretExpiresAt())
+				.clientName(registeredClientRequest.getClientName());
+
+		for (String method : registeredClientRequest.getClientAuthenticationMethods()) {
+			builder.clientAuthenticationMethod(
+					new ClientAuthenticationMethod(method));
+		}
+
+		for (String grantType : registeredClientRequest.getAuthorizationGrantTypes()) {
+			builder.authorizationGrantType(
+					new AuthorizationGrantType(grantType));
+		}
+
 		for (String redirectUri : registeredClientRequest.getRedirectUris()) {
 			builder = builder.redirectUri(redirectUri);
 		}
@@ -111,12 +137,19 @@ public class AppApiController {
 
 		RegisteredClient registeredClient = builder.build();
 		registeredClientRepository.save(registeredClient);
-		return registeredClient;
+		return this.convertRegisteredClient(registeredClient);
+	}
+
+	@GetMapping(value = "/app/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public RegisteredClientResponse readRegisteredClient(
+			@PathVariable(value = "id") String id) {
+		return this.convertRegisteredClient(registeredClientRepository.findById(id));
 	}
 
 	@PutMapping(value = "/app/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public RegisteredClient updateRegisteredClient(
+	public RegisteredClientResponse updateRegisteredClient(
 			@RequestBody RegisteredClientRequest registeredClientRequest,
 			@PathVariable(value = "id") String id) {
 		RegisteredClient existingClient = registeredClientRepository
@@ -126,6 +159,18 @@ public class AppApiController {
 		}
 
 		Builder builder = RegisteredClient.from(existingClient);
+		builder.clientName(registeredClientRequest.getClientName());
+		builder.clientAuthenticationMethods((methods) -> methods.clear());
+		for (String method : registeredClientRequest.getClientAuthenticationMethods()) {
+			builder.clientAuthenticationMethod(
+					new ClientAuthenticationMethod(method));
+		}
+		builder.authorizationGrantTypes((grantTypes) -> grantTypes.clear());
+		for (String grantType : registeredClientRequest.getAuthorizationGrantTypes()) {
+			builder.authorizationGrantType(
+					new AuthorizationGrantType(grantType));
+		}
+
 		builder.redirectUris((uris) -> uris.clear());
 		for (String redirectUri : registeredClientRequest.getRedirectUris()) {
 			builder.redirectUri(redirectUri);
@@ -137,14 +182,22 @@ public class AppApiController {
 			builder.scope(scope);
 		}
 
-		builder.clientName(registeredClientRequest.getClientName());
-
 		// In JdbcRegisteredClientRepository: client_id, client_id_issued_at,
 		// client_secret, client_secret_expires_at are never updated
 		// Also no delete function support. How should I handle client_secret update?
 
 		RegisteredClient replaceClient = builder.build();
 		registeredClientRepository.save(replaceClient);
-		return replaceClient;
+		return this.convertRegisteredClient(replaceClient);
+	}
+
+	@GetMapping(value = "/app/{id}/role", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<AppUserRole> getAppRole(@PathVariable(value = "id") String id) {
+		RegisteredClient registeredClient = registeredClientRepository.findById(id);
+		if (registeredClient == null) {
+			throw new ResourceNotFoundException("RegisteredClient id not found" + id);
+		}
+		return appUserRoleRepository.findAllByAppClientId(registeredClient.getClientId());
 	}
 }

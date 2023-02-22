@@ -4,8 +4,10 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RegisteredClientRequest {
+public class RegisteredClientResponse {
+    private String id;
     private String clientId;
+    private Instant clientIdIssuedAt;
     private String clientSecret;
     private Instant clientSecretExpiresAt;
     private String clientName;
@@ -20,6 +22,14 @@ public class RegisteredClientRequest {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public Instant getClientIdIssuedAt() {
+        return clientIdIssuedAt;
+    }
+
+    public void setClientIdIssuedAt(Instant clientIdIssuedAt) {
+        this.clientIdIssuedAt = clientIdIssuedAt;
     }
 
     public String getClientSecret() {
@@ -50,8 +60,7 @@ public class RegisteredClientRequest {
         return clientAuthenticationMethods;
     }
 
-    public void setClientAuthenticationMethods(
-            Set<String> clientAuthenticationMethods) {
+    public void setClientAuthenticationMethods(Set<String> clientAuthenticationMethods) {
         this.clientAuthenticationMethods = clientAuthenticationMethods;
     }
 
@@ -59,8 +68,7 @@ public class RegisteredClientRequest {
         return authorizationGrantTypes;
     }
 
-    public void setAuthorizationGrantTypes(
-            Set<String> authorizationGrantTypes) {
+    public void setAuthorizationGrantTypes(Set<String> authorizationGrantTypes) {
         this.authorizationGrantTypes = authorizationGrantTypes;
     }
 
@@ -78,6 +86,14 @@ public class RegisteredClientRequest {
 
     public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
 }

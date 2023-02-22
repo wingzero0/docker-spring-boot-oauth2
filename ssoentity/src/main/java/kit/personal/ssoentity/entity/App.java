@@ -1,101 +1,121 @@
 package kit.personal.ssoentity.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.time.LocalDateTime;
+import org.springframework.data.annotation.Immutable;
+import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ConfigurationSettingNames;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-@Entity(name = "oauth2_registered_client")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
+@Table(name = "oauth2_registered_client")
+@Immutable
 public class App {
 	@Id
 	private String id;
 	private String clientId;
-	private LocalDateTime clientIdIssuedAt;
+	private Timestamp clientIdIssuedAt;
 	private String clientSecret;
-	private LocalDateTime clientSecretExpiresAt;
+	private Timestamp clientSecretExpiresAt;
 	private String clientName;
-	private String clientAuthenticationMethods;
-	private String authorizationGrantTypes;
-	private String redirectUris;
-	private String scopes;
-	private String clientSettings;
-	private String tokenSettings;
 
+	@Column(name = "client_authentication_methods")
+	private String clientAuthenticationMethodsRaw;
+	@Column(name = "authorization_grant_types")
+	private String authorizationGrantTypesRaw;
+	@Column(name = "redirect_uris")
+	private String redirectUrisRaw;
+	@Column(name = "scopes")
+	private String scopesRaw;
+	@Column(name = "client_settings")
+	private String clientSettingsRaw;
+	@Column(name = "token_settings")
+	private String tokenSettingsRaw;
+
+	@Transient
+	private RegisteredClient registeredClient;
+
+	@PostLoad
+	private void PostLoad() {
+		Set<String> clientAuthenticationMethods = StringUtils.commaDelimitedListToSet(clientAuthenticationMethodsRaw);
+		Set<String> authorizationGrantTypes = StringUtils.commaDelimitedListToSet(authorizationGrantTypesRaw);
+		Set<String> redirectUris = StringUtils.commaDelimitedListToSet(redirectUrisRaw);
+		Set<String> clientScopes = StringUtils.commaDelimitedListToSet(scopesRaw);
+
+		// @formatter:off
+		RegisteredClient.Builder builder = RegisteredClient.withId(id)
+				.clientId(clientId)
+				.clientIdIssuedAt(clientIdIssuedAt != null ? clientIdIssuedAt.toInstant() : null)
+				.clientSecret(clientSecret)
+				.clientSecretExpiresAt(clientSecretExpiresAt != null ? clientSecretExpiresAt.toInstant() : null)
+				.clientName(clientName)
+				.clientAuthenticationMethods((authenticationMethods) ->
+						clientAuthenticationMethods.forEach(authenticationMethod ->
+								authenticationMethods.add(new ClientAuthenticationMethod(authenticationMethod))))
+				.authorizationGrantTypes((grantTypes) ->
+						authorizationGrantTypes.forEach(grantType ->
+								grantTypes.add(new AuthorizationGrantType(grantType))))
+				.redirectUris((uris) -> uris.addAll(redirectUris))
+				.scopes((scopes) -> scopes.addAll(clientScopes));
+		// @formatter:on
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		ClassLoader classLoader = JdbcRegisteredClientRepository.class.getClassLoader();
+		List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+		objectMapper.registerModules(securityModules);
+		objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+
+		Map<String, Object> clientSettingsMap = parseMap(objectMapper, clientSettingsRaw);
+		builder.clientSettings(ClientSettings.withSettings(clientSettingsMap).build());
+
+		Map<String, Object> tokenSettingsMap = parseMap(objectMapper, tokenSettingsRaw);
+		TokenSettings.Builder tokenSettingsBuilder = TokenSettings.withSettings(tokenSettingsMap);
+		if (!tokenSettingsMap.containsKey(ConfigurationSettingNames.Token.ACCESS_TOKEN_FORMAT)) {
+			tokenSettingsBuilder.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED);
+		}
+		builder.tokenSettings(tokenSettingsBuilder.build());
+
+		this.registeredClient = builder.build();
+	}
+
+	private Map<String, Object> parseMap(ObjectMapper objectMapper, String data) {
+		try {
+			return objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (Exception ex) {
+			throw new IllegalArgumentException(ex.getMessage(), ex);
+		}
+	}
+
+	// #region getter setter
 	public String getId() {
 		return id;
 	}
-	public void setId(String id) {
-		this.id = id;
-	}
-	public String getClientId() {
-		return clientId;
-	}
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-	public LocalDateTime getClientIdIssuedAt() {
-		return clientIdIssuedAt;
-	}
-	public void setClientIdIssuedAt(LocalDateTime clientIdIssuedAt) {
-		this.clientIdIssuedAt = clientIdIssuedAt;
-	}
-	public String getClientSecret() {
-		return clientSecret;
-	}
-	public void setClientSecret(String clientSecret) {
-		this.clientSecret = clientSecret;
-	}
-	public LocalDateTime getClientSecretExpiresAt() {
-		return clientSecretExpiresAt;
-	}
-	public void setClientSecretExpiresAt(LocalDateTime clientSecretExpiresAt) {
-		this.clientSecretExpiresAt = clientSecretExpiresAt;
-	}
-	public String getClientName() {
-		return clientName;
-	}
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
-	}
-	public String getClientAuthenticationMethods() {
-		return clientAuthenticationMethods;
-	}
-	public void setClientAuthenticationMethods(String clientAuthenticationMethods) {
-		this.clientAuthenticationMethods = clientAuthenticationMethods;
-	}
-	public String getAuthorizationGrantTypes() {
-		return authorizationGrantTypes;
-	}
-	public void setAuthorizationGrantTypes(String authorizationGrantTypes) {
-		this.authorizationGrantTypes = authorizationGrantTypes;
-	}
-	public String getRedirectUris() {
-		return redirectUris;
-	}
-	public void setRedirectUris(String redirectUris) {
-		this.redirectUris = redirectUris;
-	}
-	public String getScopes() {
-		return scopes;
-	}
-	public void setScopes(String scopes) {
-		this.scopes = scopes;
-	}
-	public String getClientSettings() {
-		return clientSettings;
-	}
-	public void setClientSettings(String clientSettings) {
-		this.clientSettings = clientSettings;
-	}
-	public String getTokenSettings() {
-		return tokenSettings;
-	}
-	public void setTokenSettings(String tokenSettings) {
-		this.tokenSettings = tokenSettings;
-	}
 
-	
+	public RegisteredClient getRegisteredClient() {
+		return registeredClient;
+	}
+	// #endregion getter setter
 }
