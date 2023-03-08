@@ -39,7 +39,7 @@ import reactor.netty.http.client.HttpClient;
  */
 @Configuration
 public class WebClientConfig {
-	private static Logger LOG = LoggerFactory.getLogger(WebClient.class);
+	private static Logger LOG = LoggerFactory.getLogger(WebClientConfig.class);
 
 	@Bean
 	WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
