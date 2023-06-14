@@ -20,13 +20,13 @@ cd ssoserver/npmLib
 npm install
 npm run postbuild
 cd ../../
-cp ssoserver/src/main/filters-example.properties ssoserver/src/main/filters-dev.properties
+# edit ssoserver/src/main/resources/application.properties to change db connection
 mvn clean compile spring-boot:run -pl ssoserver -am
 ```
 
 running role-server (it is a resource server) at localhost:8082/res
 ```bash
-cp role-server/src/main/filters-example.properties role-server/src/main/filters-dev.properties
+# edit role-server/src/main/resources/application.properties to change db connection
 mvn spring-boot:run -pl role-server -am
 ```
 

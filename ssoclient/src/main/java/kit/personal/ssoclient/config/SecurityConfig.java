@@ -1,5 +1,8 @@
 package kit.personal.ssoclient.config;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,16 +27,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
-
 
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
-    @Value("${resource.server.role.uri}")
+    @Value("${application.resource.server.role.uri}")
     private String roleUri;
     @Autowired
     private WebClient webClient;

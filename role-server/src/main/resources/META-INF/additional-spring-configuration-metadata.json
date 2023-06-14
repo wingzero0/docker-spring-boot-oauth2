@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "application.oauth.checktoken.uri",
+    "type": "java.lang.String",
+    "description": "A description for 'application.oauth.checktoken.uri'"
+  },
+  {
+    "name": "application.oauth.checktoken.clientid",
+    "type": "java.lang.String",
+    "description": "A description for 'application.oauth.checktoken.clientid'"
+  },
+  {
+    "name": "application.oauth.checktoken.clientsecret",
+    "type": "java.lang.String",
+    "description": "A description for 'application.oauth.checktoken.clientsecret'"
+  }
+]}

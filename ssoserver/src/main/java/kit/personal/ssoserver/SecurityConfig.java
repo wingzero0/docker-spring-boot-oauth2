@@ -29,10 +29,10 @@ public class SecurityConfig {
     @Autowired
     private ADUserDetailsContextMapper adUserDetailsContextMapper;
 
-    @Value("${ad.domain}")
+    @Value("${application.ad.domain}")
     private String AD_DOMAIN;
 
-    @Value("${ad.url}")
+    @Value("${application.ad.url}")
     private String AD_URL;
 
     @Bean

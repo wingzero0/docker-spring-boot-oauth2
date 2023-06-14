@@ -1,4 +1,0 @@
-bind-addr: 0.0.0.0:9000
-auth: password
-password: admin
-cert: false

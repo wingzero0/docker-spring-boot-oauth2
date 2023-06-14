@@ -14,11 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ResourceServerConfiguration {
     private static Logger LOG = LoggerFactory.getLogger(ResourceServerConfiguration.class);
 
-    @Value("${oauth.checkToken.uri}")
+    @Value("${application.oauth.checktoken.uri}")
     private String checkTokenUri;
-    @Value("${oauth.checkToken.clientId}")
+    @Value("${application.oauth.checktoken.clientid}")
     private String clientId;
-    @Value("${oauth.checkToken.clientSecret}")
+    @Value("${application.oauth.checktoken.clientsecret}")
     private String clientSecret;
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

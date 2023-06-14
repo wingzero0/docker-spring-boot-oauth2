@@ -1,16 +1,15 @@
 package kit.personal.ssoentity.repo;
 
-import kit.personal.ssoentity.entity.AppUser;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
-@Repository
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
+
+import kit.personal.ssoentity.entity.AppUser;
+
 public interface AppUserRepository extends CrudRepository<AppUser, BigInteger> {
     AppUser findOneByUsername(String username);
     AppUser findOneByUsernameAndIsActive(String username, String isActive);

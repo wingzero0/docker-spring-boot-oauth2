@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "application.resource.server.role.uri",
+    "type": "java.lang.String",
+    "description": "A description for 'application.resource.server.role.uri'"
+  }
+]}
