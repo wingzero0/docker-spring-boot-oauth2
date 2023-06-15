@@ -1,29 +1,42 @@
 package kit.personal.ssoentity.entity;
 
-import jakarta.persistence.*;
+import java.util.Date;
+import java.util.UUID;
 
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.math.BigInteger;
-import java.util.Date;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppUserRole {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private BigInteger id;
+	private String id;
 	private String username;
 	private String userRole;
 	private String appClientId;
 	private Date lastModifiedDate;
 	private String lastModifiedBy;
 
-	public BigInteger getId() {
+	@PrePersist
+	@JsonIgnore
+	public void genUUID() {
+		Date now = new Date();
+		if (!StringUtils.hasLength(this.getId())) {
+			this.setId(now.getTime() + "_" + UUID.randomUUID().toString());
+		}
+	}
+
+	public String getId() {
 		return id;
 	}
 
-	public AppUserRole setId(BigInteger id) {
+	public AppUserRole setId(String id) {
 		this.id = id;
 		return this;
 	}

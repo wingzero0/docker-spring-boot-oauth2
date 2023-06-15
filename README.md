@@ -70,7 +70,7 @@ use access token to visit resource server
 # if your token has scope message.read, you could try this
 curl -v http://localhost:8082/res/api/testScopeRead -H "Authorization: Bearer xxxx"
 # if your token has scope app_role
-curl -v http://localhost:8082/res/api/app_role -H "Authorization: Bearer xxxx"
+curl -v http://localhost:8082/res/api/appRole -H "Authorization: Bearer xxxx"
 # you will get 403 if scope is wrong
 ```
 

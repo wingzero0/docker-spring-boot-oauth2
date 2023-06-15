@@ -1,6 +1,5 @@
 package kit.personal.ssoentity.repo;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import kit.personal.ssoentity.entity.AppUserRole;
 
-public interface AppUserRoleRepository extends CrudRepository<AppUserRole, BigInteger> {
+public interface AppUserRoleRepository extends CrudRepository<AppUserRole, String> {
 	List<AppUserRole> findAllByUsername(String username);
 	List<AppUserRole> findAllByAppClientId(String app);
 	Page<AppUserRole> findAllByAppClientId(String app, Pageable pageable);
