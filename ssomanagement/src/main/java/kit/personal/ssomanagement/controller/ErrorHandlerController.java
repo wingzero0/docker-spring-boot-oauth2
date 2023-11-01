@@ -18,7 +18,7 @@ public class ErrorHandlerController implements ErrorController {
     private static Logger LOG = LoggerFactory.getLogger(ErrorHandlerController.class);
 
     @RequestMapping("/error")
-    public Object handleError(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
+    public void handleError(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
         Object forward = request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
@@ -41,10 +41,7 @@ public class ErrorHandlerController implements ErrorController {
                                                               // this point, it should be the routing not found;
                 RequestDispatcher dispatcher = request.getServletContext().getRequestDispatcher("/index.html");
                 dispatcher.forward(request, response);
-                return "forward:/index.html";
             }
-
         }
-        return "unkonw error"; // use white label error
     }
 }
