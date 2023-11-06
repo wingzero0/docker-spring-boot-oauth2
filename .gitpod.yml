@@ -14,8 +14,4 @@ tasks:
   - name: init m2 dependency
     init: mvn clean compile
   - name: run docker compose
-    init: |
-      cp /etc/hosts /tmp/hosts
-      echo "127.0.0.1 postgresqldb" >> /tmp/hosts
-      sudo cp /tmp/hosts /etc/hosts
-    command: docker compose up
+    command: bash .gitpod.sh
