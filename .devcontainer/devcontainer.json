@@ -21,9 +21,9 @@
 		"vscode": {
 			"extensions": [
 				"vscjava.vscode-java-pack",
-				"ms-azuretools.vscode-docker",
+				"mhutchie.git-graph",
 				"mtxr.sqltools",
-				"mtxr.sqltools-driver-mysql"
+				"mtxr.sqltools-driver-pg"
 			]
 		}
 	}
