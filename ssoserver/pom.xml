@@ -6,7 +6,7 @@
 
 	<groupId>kit.personal.sso</groupId>
 	<artifactId>ssoserver</artifactId>
-	<version>0.12.0-SNAPSHOT</version>
+	<version>0.12.0</version>
 	<packaging>war</packaging>
 
 	<name>ssoserver</name>
@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>kit.personal.sso</groupId>
 		<artifactId>ssoparent</artifactId>
-		<version>0.12.0-SNAPSHOT</version>
+		<version>0.12.0</version>
 	</parent>
 
 	<properties>
