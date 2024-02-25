@@ -5,7 +5,7 @@
 
 	<groupId>kit.personal.sso</groupId>
 	<artifactId>ssoparent</artifactId>
-	<version>0.12.0</version>
+	<version>0.12.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>ssoparent</name>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.7</version>
+		<version>3.2.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<modules>
@@ -37,7 +37,7 @@
 			<dependency>
 				<groupId>kit.personal.sso</groupId>
 				<artifactId>ssoentity</artifactId>
-				<version>0.12.0</version>
+				<version>0.12.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security</groupId>
