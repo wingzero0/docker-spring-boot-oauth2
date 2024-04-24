@@ -15,11 +15,6 @@
  */
 package kit.personal.ssoserver;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
-
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +25,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -49,7 +43,11 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 
 import kit.personal.ssoserver.jose.Jwks;
 
@@ -61,28 +59,19 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	@Order(Ordered.HIGHEST_PRECEDENCE)
-	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-		OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
-		authorizationServerConfigurer
+	public SecurityFilterChain authorizationServerSecurityFilterChain(
+			HttpSecurity http, RegisteredClientRepository registeredClientRepository,
+			AuthorizationServerSettings authorizationServerSettings) throws Exception {
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
 				.authorizationEndpoint(
 						authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
 				.oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
-
-		RequestMatcher endpointsMatcher = authorizationServerConfigurer
-				.getEndpointsMatcher();
-		// @formatter:off
 		http
-			.securityMatcher(endpointsMatcher)
-			.authorizeHttpRequests(authorize ->
-				authorize.anyRequest().authenticated()
-			)
-			.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-			.exceptionHandling(exceptions ->
-				exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-			)
-			.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-			.apply(authorizationServerConfigurer);
-		// @formatter:on
+				.exceptionHandling(exceptions -> exceptions
+						.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+				.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
+
 		return http.build();
 	}
 
@@ -90,9 +79,9 @@ public class AuthorizationServerConfig {
 	public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
 		JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
 		if (initOauth2RegisteredClient &&
-			registeredClientRepository.findByClientId("messaging-client2") == null) {
-				BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-				RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				registeredClientRepository.findByClientId("messaging-client2") == null) {
+			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+			RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
 					.clientId("messaging-client2")
 					.clientSecret(encoder.encode("secret"))
 					.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)

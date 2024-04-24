@@ -42,9 +42,9 @@ public class SecurityConfig {
             authorizeRequests.requestMatchers("/js/**").permitAll();
             authorizeRequests.requestMatchers("/css/**").permitAll();
             authorizeRequests.anyRequest().authenticated();
-        })
-        // .formLogin(withDefaults());
-                .formLogin().loginPage("/login").failureUrl("/login-error").permitAll();
+        }).formLogin(formLogin -> {
+            formLogin.loginPage("/login").failureUrl("/login-error").permitAll();
+        });
 
         return http.build();
     }

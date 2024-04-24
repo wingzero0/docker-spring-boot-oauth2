@@ -27,7 +27,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
@@ -40,9 +39,9 @@ public class SecurityConfig {
 
     // @formatter:off
     @Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests(authorizeRequests ->{
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(authorizeRequests ->{
                 authorizeRequests
                     .requestMatchers("/usercustom").hasRole("CUSTOM")
                     .requestMatchers("/usergoogle").hasRole("GOOGLE")
@@ -51,26 +50,26 @@ public class SecurityConfig {
                 authorizeRequests.anyRequest().authenticated();
             })
             .oauth2Login(oauth2Login ->{
-				oauth2Login
-					.loginPage("/loginPage")
-					.userInfoEndpoint()
-					.userService(this.userService())
-					.oidcUserService(this.oidcUserService());
+                oauth2Login
+                    .loginPage("/loginPage")
+                    .userInfoEndpoint((config)->{config
+                        .userService(this.userService())
+                        .oidcUserService(this.oidcUserService());
+                    });
             })
-			.oauth2Client(withDefaults());
+            .oauth2Client(withDefaults());
 
 
-
-        http.logout()
-            .logoutUrl("/logoutPage")
-            .logoutSuccessUrl("/")
-            .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID");
-		return http.build();
-	}
+        http.logout(logout -> logout
+                .logoutUrl("/logoutPage")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID"));
+        return http.build();
+    }
     // @formatter:on
 
-	private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
+    private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
         return (userRequest) -> {
@@ -94,17 +93,17 @@ public class SecurityConfig {
             LOG.debug("oidcUserName:" + oidcUser.getName());
 
             String[] messages = this.webClient
-				.get()
-				.uri(this.roleUri + oidcUser.getName())
-				.attributes(clientRegistrationId("messaging-client-client-credentials"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
-            for (String message: messages) {
+                    .get()
+                    .uri(this.roleUri + oidcUser.getName())
+                    .attributes(clientRegistrationId("messaging-client-client-credentials"))
+                    .retrieve()
+                    .bodyToMono(String[].class)
+                    .block();
+            for (String message : messages) {
                 LOG.debug("ROLE:" + message);
                 mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
             }
-            
+
             oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
 
             return oidcUser;

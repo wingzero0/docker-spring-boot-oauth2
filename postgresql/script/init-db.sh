@@ -30,6 +30,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         refresh_token_issued_at timestamp DEFAULT NULL,
         refresh_token_expires_at timestamp DEFAULT NULL,
         refresh_token_metadata text DEFAULT NULL,
+        user_code_value text DEFAULT NULL,
+        user_code_issued_at timestamp DEFAULT NULL,
+        user_code_expires_at timestamp DEFAULT NULL,
+        user_code_metadata text DEFAULT NULL,
+        device_code_value text DEFAULT NULL,
+        device_code_issued_at timestamp DEFAULT NULL,
+        device_code_expires_at timestamp DEFAULT NULL,
+        device_code_metadata text DEFAULT NULL,
         PRIMARY KEY (id)
     );
 
@@ -50,6 +58,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         client_authentication_methods varchar(1000) NOT NULL,
         authorization_grant_types varchar(1000) NOT NULL,
         redirect_uris varchar(1000) DEFAULT NULL,
+        post_logout_redirect_uris varchar(1000) DEFAULT NULL,
         scopes varchar(1000) NOT NULL,
         client_settings varchar(2000) NOT NULL,
         token_settings varchar(2000) NOT NULL,
