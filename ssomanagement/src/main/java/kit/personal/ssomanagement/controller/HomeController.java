@@ -42,8 +42,8 @@ public class HomeController{
     @Value("${spring.security.oauth2.client.provider.spring.issuer-uri}")
     private String ssoserverBaseURL;
 
-    @Value("${application.disable_api_auth}")
-    private boolean isDisableAPIAuth;
+    @Value("${application.http-auth.enable}")
+    private boolean httpAuthEnabled;
 
     @Autowired
     LoginChecker loginChecker;
@@ -121,7 +121,7 @@ public class HomeController{
         }
         Map<String, String> map = new HashMap<>();
         map.put("csrf_header","X-CSRF-TOKEN");
-        if (isDisableAPIAuth){
+        if (!httpAuthEnabled){
             LOG.debug("dummy csrf_token");
             map.put("csrf_token", "dummy");
         } else {

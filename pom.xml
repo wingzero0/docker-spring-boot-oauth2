@@ -22,7 +22,7 @@
 		<module>ssoserver</module>
 		<module>ssoclient</module>
 		<module>role-server</module>
-		<!-- <module>ssomanagement</module> -->
+		<module>ssomanagement</module>
 		<module>ssomanagement-application-runner</module>
 	</modules>
 

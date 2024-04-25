@@ -34,8 +34,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class SecurityConfig {
     private static Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
-    @Value("${application.disable_api_auth}")
-    private boolean isDisableAPIAuth;
+    @Value("${application.http-auth.enable}")
+    private boolean httpAuthEnabled;
     @Value("${application.resource.server.role.uri}")
     private String roleUri;
     @Autowired
@@ -43,35 +43,38 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        if (isDisableAPIAuth) {
+        if (!httpAuthEnabled) {
             http.authorizeHttpRequests(authorizeRequests -> {
                 authorizeRequests
                         .requestMatchers("/**").permitAll();
             });
-            http.csrf().disable();
+            http.csrf(csrf -> csrf.disable());
             LOG.debug("disable auth");
         } else {
             http.authorizeHttpRequests(authorizeRequests -> {
                 authorizeRequests
-                        .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "APP_ADMIN", "USER")
-                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "APP_ADMIN")
+                        .requestMatchers("/api/csrf-token").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN")
                         .requestMatchers("/selfServiceApi/**").hasRole("USER")
                         .requestMatchers("/loginPage").permitAll()
-                        .requestMatchers("/js/about**.js").permitAll();
+                        .requestMatchers("/static/**").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll();
                 authorizeRequests.anyRequest().authenticated();
             }).oauth2Login(oauth2Login -> {
                 oauth2Login
                         .loginPage("/loginPage")
-                        .userInfoEndpoint()
-                        .userService(this.userService())
-                        .oidcUserService(this.oidcUserService());
+                        .userInfoEndpoint((config) -> {
+                            config
+                                    .userService(this.userService())
+                                    .oidcUserService(this.oidcUserService());
+                        });
             }).oauth2Client(withDefaults());
 
-            http.logout()
+            http.logout(logout -> logout
                     .logoutUrl("/logoutPage")
                     .logoutSuccessUrl("/")
                     .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID");
+                    .deleteCookies("JSESSIONID"));
         }
         return http.build();
     }
@@ -107,9 +110,6 @@ public class SecurityConfig {
                 LOG.debug("ROLE:" + message);
                 mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
             }
-
-            // TODO implement cross app checking, get other_client_app_admin
-
             oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
 
             return oidcUser;

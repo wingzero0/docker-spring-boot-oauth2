@@ -12,15 +12,15 @@ import java.util.HashSet;
 
 @Service
 public class LoginChecker {
-	@Value("${application.disable_api_auth}")
-	private boolean isDisableAPIAuth;
+	@Value("${application.http-auth.enable}")
+	private boolean httpAuthEnabled;
 	@Value("${application.dummy_login_role}")
 	private String dummyLoginRole;
 	@Value("${application.dummy_login_name}")
 	private String dummyLoginName;
 
 	public String getLoginName(Authentication auth) {
-		if (isDisableAPIAuth){
+		if (!httpAuthEnabled){
 			return dummyLoginName;
 		} else {
 			return auth.getName();
@@ -28,7 +28,7 @@ public class LoginChecker {
 	}
 
 	public String getLoginName(Principal auth) {
-		if (isDisableAPIAuth){
+		if (!httpAuthEnabled){
 			return dummyLoginName;
 		} else {
 			return auth.getName();
@@ -40,7 +40,7 @@ public class LoginChecker {
 	}
 
 	public Collection<? extends GrantedAuthority> getGrantedAuthorities(Authentication auth) {
-		if (isDisableAPIAuth){
+		if (!httpAuthEnabled){
 			Collection<GrantedAuthority> dummyAuthority = new HashSet<>();
 			dummyAuthority.add(new SimpleGrantedAuthority(dummyLoginRole));
 			return dummyAuthority;

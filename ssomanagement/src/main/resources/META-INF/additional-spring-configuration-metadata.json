@@ -1,8 +1,8 @@
 {"properties": [
   {
-    "name": "application.disable_api_auth",
+    "name": "application.http-auth.enable",
     "type": "java.lang.String",
-    "description": "A description for 'application.disable_api_auth'"
+    "description": "A description for 'application.http-auth.enable'"
   },
   {
     "name": "application.dummy_login_role",

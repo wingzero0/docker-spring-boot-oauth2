@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -45,14 +46,20 @@ public class App {
 	private String clientAuthenticationMethodsRaw;
 	@Column(name = "authorization_grant_types")
 	private String authorizationGrantTypesRaw;
+	@Lob
 	@Column(name = "redirect_uris")
 	private String redirectUrisRaw;
 	@Column(name = "scopes")
 	private String scopesRaw;
+	@Lob
 	@Column(name = "client_settings")
 	private String clientSettingsRaw;
+	@Lob
 	@Column(name = "token_settings")
 	private String tokenSettingsRaw;
+	@Lob
+	@Column(name = "post_logout_redirect_uris")
+	private String postLogoutRedirectUris;
 
 	@Transient
 	private RegisteredClient registeredClient;
