@@ -20,7 +20,7 @@
         <div class="toolbar">
           <el-dropdown>
             <el-icon style="margin-right: 8px; margin-top: 1px">
-              <setting />
+              <Setting />
             </el-icon>
             <template #dropdown>
               <el-dropdown-menu>
@@ -45,7 +45,7 @@
 
 <script lang="ts" setup>
 import { RouterLink, RouterView } from 'vue-router'
-import { Platform } from '@element-plus/icons-vue'
+import { Platform, Setting } from '@element-plus/icons-vue'
 </script>
 
 <style scoped>

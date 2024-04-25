@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -36,30 +35,29 @@ import jakarta.persistence.Transient;
 public class App {
 	@Id
 	private String id;
+	@Column(length = 100)
 	private String clientId;
 	private Timestamp clientIdIssuedAt;
+	@Column(length = 200)
 	private String clientSecret;
 	private Timestamp clientSecretExpiresAt;
+	@Column(length = 200)
 	private String clientName;
 
-	@Column(name = "client_authentication_methods")
+	@Column(name = "client_authentication_methods", length = 1000)
 	private String clientAuthenticationMethodsRaw;
-	@Column(name = "authorization_grant_types")
+	@Column(name = "authorization_grant_types", length = 1000)
 	private String authorizationGrantTypesRaw;
-	@Lob
-	@Column(name = "redirect_uris")
+	@Column(name = "redirect_uris", length = 1000)
 	private String redirectUrisRaw;
-	@Column(name = "scopes")
+	@Column(name = "post_logout_redirect_uris", length = 1000)
+	private String postLogoutRedirectUrisRaw;
+	@Column(name = "scopes", length = 1000)
 	private String scopesRaw;
-	@Lob
-	@Column(name = "client_settings")
+	@Column(name = "client_settings", length = 2000)
 	private String clientSettingsRaw;
-	@Lob
-	@Column(name = "token_settings")
+	@Column(name = "token_settings", length = 2000)
 	private String tokenSettingsRaw;
-	@Lob
-	@Column(name = "post_logout_redirect_uris")
-	private String postLogoutRedirectUris;
 
 	@Transient
 	private RegisteredClient registeredClient;

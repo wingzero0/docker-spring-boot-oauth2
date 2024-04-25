@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router'
+import { getAppList } from '@/api/app'
 
 const appList = ref([{
   registeredClientId: "message_client_ui",
@@ -19,6 +20,8 @@ const appList = ref([{
   registeredClientId: "message_client_ui",
   clientName: "message client ui",
 }])
+
+const appListDummy = getAppList(0, 10);
 </script>
 
 <template>
