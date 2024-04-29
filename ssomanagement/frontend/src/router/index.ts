@@ -11,6 +11,11 @@ const router = createRouter({
       component: AppListView
     },
     {
+      path: '/role',
+      name: 'rolelist',
+      component: () => import('../views/RoleListView.vue')
+    },
+    {
       path: '/home',
       name: 'home',
       component: HomeView

@@ -2,43 +2,50 @@
 import { ref } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router'
-import { getAppList } from '@/api/app'
 
-const appList = ref([{
+const roleList = ref([{
   registeredClientId: "message_client_ui",
-  clientName: "message client ui",
+  username: "username",
+  rolename: "role name",
 }, {
   registeredClientId: "message_client_ui",
-  clientName: "message client ui",
+  username: "username",
+  rolename: "role name",
 }, {
   registeredClientId: "message_client_ui",
-  clientName: "message client ui",
+  username: "username",
+  rolename: "role name",
 }, {
   registeredClientId: "message_client_ui",
-  clientName: "message client ui",
+  username: "username",
+  rolename: "role name",
 }, {
   registeredClientId: "message_client_ui",
-  clientName: "message client ui",
+  username: "username",
+  rolename: "role name",
 }])
 
-const appListDummy = getAppList(0, 10);
+// const roleListDummy = getroleList(0, 10);
 </script>
 
 <template>
-  <el-row v-for="item in appList">
+  <el-row v-for="item in roleList">
     <el-col :span="2">
-      <RouterLink :to="{ name: 'rolelist' }">
+      <RouterLink :to="{ name: 'applist' }">
         <el-icon>
           <Edit />
         </el-icon>
-        Role
+        Edit
       </RouterLink>
     </el-col>
     <el-col :span="4">
       {{ item.registeredClientId }}
     </el-col>
     <el-col :span="4">
-      {{ item.clientName }}
+      {{ item.username }}
+    </el-col>
+    <el-col :span="4">
+      {{ item.rolename }}
     </el-col>
   </el-row>
 </template>
