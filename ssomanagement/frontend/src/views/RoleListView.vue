@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, Plus } from '@element-plus/icons-vue'
 import { RouterLink } from 'vue-router'
+import { getRoleList } from '@/api/role'
 
 const roleList = ref([{
   registeredClientId: "message_client_ui",
@@ -25,18 +26,22 @@ const roleList = ref([{
   rolename: "role name",
 }])
 
-// const roleListDummy = getroleList(0, 10);
+const roleListDummy = getRoleList(0, 10);
 </script>
 
 <template>
+  <el-row>
+    <div >
+      <el-button type="primary" :icon="Plus">
+        Add Role
+      </el-button>
+    </div>
+  </el-row>
   <el-row v-for="item in roleList">
     <el-col :span="2">
-      <RouterLink :to="{ name: 'applist' }">
-        <el-icon>
-          <Edit />
-        </el-icon>
+      <el-button type="primary" :icon="Edit" plain>
         Edit
-      </RouterLink>
+      </el-button>
     </el-col>
     <el-col :span="4">
       {{ item.registeredClientId }}

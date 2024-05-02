@@ -2,10 +2,10 @@ import request from 'axios'
 
 export const getAppList = async (pageNumber: number, pageSize: number): Promise<string[]> => {
   try {
-    let uri: string = '/api/app?pageNumber=' + pageNumber + "&pageSize=" + pageSize;
-    let response = await request.get(uri, {});
+    const uri: string = '/api/app?pageNumber=' + pageNumber + "&pageSize=" + pageSize;
+    const response = await request.get(uri, {});
     console.log(response);
-    let clientId = response.data.content.map(app=>app.clientId);
+    const clientId = response.data.content.map((app: { clientId: string; })=>app.clientId);
     console.log(clientId);
   } catch (error) {
     console.log("got error")
