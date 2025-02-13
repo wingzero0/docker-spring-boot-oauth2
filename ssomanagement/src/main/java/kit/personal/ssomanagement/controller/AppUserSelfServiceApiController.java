@@ -27,7 +27,7 @@ public class AppUserSelfServiceApiController {
 	public AppUser getAppUser(
 			Principal principal
 	){
-		AppUser appUser = appUserRepo.findOneByUsernameAndIsActive(loginChecker.getLoginName(principal), "Y");
+		AppUser appUser = appUserRepo.findOneByUsernameAndIsActive(loginChecker.getLoginName(principal), true);
 		if (appUser == null) {
 			throw new ResourceNotFoundException(loginChecker.getLoginName(principal) + " doesn't not exists");
 		}
@@ -40,7 +40,7 @@ public class AppUserSelfServiceApiController {
 			Principal principal
 	){
 		String loginName = loginChecker.getLoginName(principal);
-		AppUser appUser = appUserRepo.findOneByUsernameAndIsActive(loginName, "Y");
+		AppUser appUser = appUserRepo.findOneByUsernameAndIsActive(loginName, true);
 		if (appUser == null) {
 			throw new ResourceNotFoundException(loginName + " doesn't not exists");
 		}

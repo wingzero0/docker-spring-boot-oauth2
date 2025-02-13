@@ -7,6 +7,9 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
+@Table(indexes = {
+    @Index(columnList = "username", unique = true)
+})
 public class AppUser implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,7 +21,7 @@ public class AppUser implements Serializable {
     private String password;
     @JsonView(EntityJsonView.PUBLIC_VIEW.class)
     private String email;
-    private String isActive;
+    private Boolean isActive;
     private Date lastModifiedDate;
     private String lastModifiedBy;
 
@@ -67,15 +70,6 @@ public class AppUser implements Serializable {
         return this;
     }
 
-    public String getIsActive() {
-        return isActive;
-    }
-
-    public AppUser setIsActive(String isActive) {
-        this.isActive = isActive;
-        return this;
-    }
-
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }
@@ -91,6 +85,15 @@ public class AppUser implements Serializable {
 
     public AppUser setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
+        return this;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public AppUser setIsActive(Boolean isActive) {
+        this.isActive = isActive;
         return this;
     }
 }

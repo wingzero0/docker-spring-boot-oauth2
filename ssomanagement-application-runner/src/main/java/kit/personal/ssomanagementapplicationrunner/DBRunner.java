@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import kit.personal.ssomanagementapplicationrunner.service.AppUserRoleService;
+import kit.personal.ssomanagementapplicationrunner.service.AppUserService;
 import kit.personal.ssomanagementapplicationrunner.service.RegisteredClientService;
 
 @Component
@@ -19,6 +20,8 @@ public class DBRunner implements ApplicationRunner {
     private RegisteredClientService registeredClientService;
     @Autowired
     private AppUserRoleService appUserRoleService;
+    @Autowired
+    private AppUserService appUserService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -39,6 +42,15 @@ public class DBRunner implements ApplicationRunner {
             String username = args.getOptionValues("username").get(0);
             List<String> userRoles = args.getOptionValues("userRole");
             appUserRoleService.createAppUserRole(clientId, username, userRoles);
+        } else if (optionNames.contains("username")
+                && optionNames.contains("displayName")
+                && optionNames.contains("password")
+                && optionNames.contains("email")) {
+            String username = args.getOptionValues("username").get(0);
+            String displayName = args.getOptionValues("displayName").get(0);
+            String password = args.getOptionValues("password").get(0);
+            String email = args.getOptionValues("email").get(0);
+            appUserService.createAppUser(username, displayName, password, email);
         } else {
             System.out.println("for creating registered client (sso client):");
             System.out.println(
@@ -48,9 +60,18 @@ public class DBRunner implements ApplicationRunner {
                                 --redirectUri=http://127.0.0.1:8080/ --scope=profile --scope=role
                             or:
                                 mvn spring-boot:run -pl ssomanagement-application-runner -am \\
-                                -Dspring-boot.run.arguments=\"--clientId=xxx --clientSecret=xxx --redirectUri=http://127.0.0.1:8080/ --scope=profile --scope=role\"
+                                -Dspring-boot.run.arguments="--clientId=xxx --clientSecret=xxx --redirectUri=http://127.0.0.1:8080/ --redirectUri=https://somedomain/ --scope=profile --scope=role"
                             """);
 
+            System.out.println("for creating user:");
+            System.out.println(
+                    """
+                            usage:
+                                java -jar ssomanagement-application-runner.jar --username=xxx --displayName=xxx --password=xxx --email=xx@xx
+                            or:
+                                mvn spring-boot:run -pl ssomanagement-application-runner -am \\
+                                -Dspring-boot.run.arguments="--username=xxx --displayName=xxx --password=xxx --email=xx@xx"
+                            """);
             System.out.println("for creating user role:");
             System.out.println(
                     """
@@ -58,7 +79,7 @@ public class DBRunner implements ApplicationRunner {
                                 java -jar ssomanagement-application-runner.jar --clientId=xxx --username=xxx --userRole=ADMIN --userRole=GUEST
                             or:
                                 mvn spring-boot:run -pl ssomanagement-application-runner -am \\
-                                -Dspring-boot.run.arguments=\"--clientId=xxx --username=xxx --userRole=ADMIN --userRole=GUEST\"
+                                -Dspring-boot.run.arguments="--clientId=xxx --username=xxx --userRole=ADMIN --userRole=GUEST"
                             """);
         }
     }

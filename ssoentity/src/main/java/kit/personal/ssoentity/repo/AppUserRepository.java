@@ -12,7 +12,7 @@ import kit.personal.ssoentity.entity.AppUser;
 
 public interface AppUserRepository extends CrudRepository<AppUser, BigInteger> {
     AppUser findOneByUsername(String username);
-    AppUser findOneByUsernameAndIsActive(String username, String isActive);
+    AppUser findOneByUsernameAndIsActive(String username, Boolean isActive);
     AppUser findOneByEmail(String email);
     List<AppUser> findAllByUsernameIn(Collection<String> usernames);
     Page<AppUser> findAllByUsernameContainsOrDisplayNameContains(String username, String displayName, Pageable pageable);

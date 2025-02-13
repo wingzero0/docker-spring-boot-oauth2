@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class RegisteredClientService {
     @Autowired
     private RegisteredClientRepository registeredClientRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public void createRegisteredClient(
             String clientId,
@@ -31,7 +33,6 @@ public class RegisteredClientService {
         }
         Builder builder = RegisteredClient.withId(UUID.randomUUID().toString());
         Date now = new Date();
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         builder = builder
                 .clientId(clientId)
                 .clientIdIssuedAt(now.toInstant())
