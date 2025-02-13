@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kit.personal.ssoentity.entity.App;
 import kit.personal.ssoentity.entity.AppUserRole;
 import kit.personal.ssoentity.repo.AppRepository;
@@ -43,6 +44,7 @@ import kit.personal.ssomanagement.utility.LoginChecker;
 
 @Controller
 @RequestMapping(value = "/api")
+@Tag(name = "AppApiController")
 public class AppApiController {
 	@Autowired
 	private AppRepository appRepository;

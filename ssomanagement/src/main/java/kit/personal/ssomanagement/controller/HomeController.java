@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,7 @@ import java.time.Duration;
 import java.util.*;
 
 @Controller
+@Tag(name = "HomeController")
 public class HomeController{
     @Value("${spring.security.oauth2.client.provider.spring.issuer-uri}")
     private String ssoserverBaseURL;
