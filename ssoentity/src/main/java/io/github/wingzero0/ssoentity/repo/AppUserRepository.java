@@ -1,4 +1,4 @@
-package kit.personal.ssoentity.repo;
+package io.github.wingzero0.ssoentity.repo;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
-import kit.personal.ssoentity.entity.AppUser;
+import io.github.wingzero0.ssoentity.entity.AppUser;
 
 public interface AppUserRepository extends CrudRepository<AppUser, BigInteger> {
     AppUser findOneByUsername(String username);

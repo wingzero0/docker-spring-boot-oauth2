@@ -1,4 +1,4 @@
-package kit.personal.ssoentity.entity;
+package io.github.wingzero0.ssoentity.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;

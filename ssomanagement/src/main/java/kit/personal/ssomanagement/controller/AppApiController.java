@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kit.personal.ssoentity.entity.App;
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppRepository;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.entity.App;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.repo.AppRepository;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
 import kit.personal.ssomanagement.controller.exception.WrongParameterException;
 import kit.personal.ssomanagement.utility.LoginChecker;

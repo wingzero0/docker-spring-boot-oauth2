@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import kit.personal.ssoentity.entity.AppUser;
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppUserRepository;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.entity.AppUser;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.repo.AppUserRepository;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

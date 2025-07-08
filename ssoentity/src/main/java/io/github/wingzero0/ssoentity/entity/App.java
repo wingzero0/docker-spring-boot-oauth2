@@ -1,4 +1,4 @@
-package kit.personal.ssoentity.entity;
+package io.github.wingzero0.ssoentity.entity;
 
 import java.sql.Timestamp;
 import java.util.List;

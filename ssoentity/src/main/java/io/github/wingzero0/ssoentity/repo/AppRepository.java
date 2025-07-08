@@ -1,6 +1,6 @@
-package kit.personal.ssoentity.repo;
+package io.github.wingzero0.ssoentity.repo;
 
-import kit.personal.ssoentity.entity.App;
+import io.github.wingzero0.ssoentity.entity.App;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;

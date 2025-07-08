@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 
 @Service
 public class AppUserRoleService {

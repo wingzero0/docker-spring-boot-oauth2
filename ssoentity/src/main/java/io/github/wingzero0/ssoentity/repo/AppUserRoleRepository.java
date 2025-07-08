@@ -1,4 +1,4 @@
-package kit.personal.ssoentity.repo;
+package io.github.wingzero0.ssoentity.repo;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
-import kit.personal.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
 
 public interface AppUserRoleRepository extends CrudRepository<AppUserRole, String> {
 	List<AppUserRole> findAllByUsername(String username);

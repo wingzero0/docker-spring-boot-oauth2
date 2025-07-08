@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")

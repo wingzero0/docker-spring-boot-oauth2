@@ -3,8 +3,8 @@ package kit.personal.ssomanagementapplicationrunner.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import kit.personal.ssoentity.entity.AppUser;
-import kit.personal.ssoentity.repo.AppUserRepository;
+import io.github.wingzero0.ssoentity.entity.AppUser;
+import io.github.wingzero0.ssoentity.repo.AppUserRepository;
 
 @Service
 public class AppUserService {

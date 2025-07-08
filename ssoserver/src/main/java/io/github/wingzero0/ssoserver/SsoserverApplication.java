@@ -7,8 +7,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "kit.personal.ssoentity.repo")
-@EntityScan(basePackages = "kit.personal.ssoentity.entity")
+@EnableJpaRepositories(basePackages = "io.github.wingzero0.ssoentity.repo")
+@EntityScan(basePackages = "io.github.wingzero0.ssoentity.entity")
 public class SsoserverApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {

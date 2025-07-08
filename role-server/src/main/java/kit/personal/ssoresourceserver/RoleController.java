@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 
 import java.security.Principal;
 import java.util.HashMap;

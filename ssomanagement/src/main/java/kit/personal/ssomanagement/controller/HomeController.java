@@ -1,7 +1,7 @@
 package kit.personal.ssomanagement.controller;
 
-import kit.personal.ssoentity.entity.AppUserRole;
-import kit.personal.ssoentity.repo.AppUserRoleRepository;
+import io.github.wingzero0.ssoentity.entity.AppUserRole;
+import io.github.wingzero0.ssoentity.repo.AppUserRoleRepository;
 import kit.personal.ssomanagement.config.LoginInfo;
 import kit.personal.ssomanagement.utility.LoginChecker;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package kit.personal.ssomanagement.controller;
 
-import kit.personal.ssoentity.entity.AppUser;
-import kit.personal.ssoentity.repo.AppUserRepository;
+import io.github.wingzero0.ssoentity.entity.AppUser;
+import io.github.wingzero0.ssoentity.repo.AppUserRepository;
 import kit.personal.ssomanagement.controller.exception.ResourceNotFoundException;
 import kit.personal.ssomanagement.utility.LoginChecker;
 import org.springframework.beans.factory.annotation.Autowired;
