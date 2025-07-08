@@ -1,4 +1,4 @@
-package kit.personal.ssoserver;
+package io.github.wingzero0.ssoserver;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

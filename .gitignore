@@ -6,3 +6,4 @@ ssoparent.iml
 /spring-authorization-server/
 /auth-server-sample/
 .DS_Store
+/.idea/

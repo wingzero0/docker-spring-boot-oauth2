@@ -1,4 +1,4 @@
-package kit.personal.ssoserver.controller.exception;
+package io.github.wingzero0.ssoserver.controller.exception;
 
 
 import org.springframework.http.HttpStatus;

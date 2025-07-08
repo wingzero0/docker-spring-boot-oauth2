@@ -1,4 +1,4 @@
-package kit.personal.ssoserver.controller;
+package io.github.wingzero0.ssoserver.controller;
 
 import java.io.IOException;
 

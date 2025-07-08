@@ -1,4 +1,4 @@
-package kit.personal.ssoserver.controller;
+package io.github.wingzero0.ssoserver.controller;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import kit.personal.ssoserver.controller.exception.ResourceNotFoundException;
+import io.github.wingzero0.ssoserver.controller.exception.ResourceNotFoundException;
 
 @Controller
 public class AuthorizationConsentController {

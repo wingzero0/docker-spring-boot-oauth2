@@ -1,4 +1,4 @@
-package kit.personal.ssoserver;
+package io.github.wingzero0.ssoserver;
 
 import java.util.Collection;
 import java.util.HashSet;

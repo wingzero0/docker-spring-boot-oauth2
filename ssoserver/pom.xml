@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>kit.personal.sso</groupId>
+	<groupId>io.github.wingzero0</groupId>
 	<artifactId>ssoserver</artifactId>
 	<packaging>war</packaging>
 
@@ -12,7 +12,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<parent>
-		<groupId>kit.personal.sso</groupId>
+		<groupId>io.github.wingzero0</groupId>
 		<artifactId>ssoparent</artifactId>
 		<version>0.12.1-SNAPSHOT</version>
 	</parent>
@@ -24,7 +24,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>kit.personal.sso</groupId>
+			<groupId>io.github.wingzero0</groupId>
 			<artifactId>ssoentity</artifactId>
 		</dependency>
 		<dependency>

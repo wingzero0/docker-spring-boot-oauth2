@@ -1,4 +1,4 @@
-package kit.personal.ssoserver;
+package io.github.wingzero0.ssoserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

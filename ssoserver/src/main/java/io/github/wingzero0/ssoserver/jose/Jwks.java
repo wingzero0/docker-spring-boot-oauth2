@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kit.personal.ssoserver.jose;
+package io.github.wingzero0.ssoserver.jose;
 
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kit.personal.ssoserver;
+package io.github.wingzero0.ssoserver;
 
 import java.util.UUID;
 
@@ -49,7 +49,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import kit.personal.ssoserver.jose.Jwks;
+import io.github.wingzero0.ssoserver.jose.Jwks;
 
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {

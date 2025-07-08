@@ -1,4 +1,4 @@
-package kit.personal.ssoserver;
+package io.github.wingzero0.ssoserver;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

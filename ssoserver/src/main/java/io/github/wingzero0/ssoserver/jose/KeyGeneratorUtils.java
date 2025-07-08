@@ -1,4 +1,4 @@
-package kit.personal.ssoserver.jose;
+package io.github.wingzero0.ssoserver.jose;
 
 import java.math.BigInteger;
 import java.security.KeyPair;

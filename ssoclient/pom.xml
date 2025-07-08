@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>kit.personal.sso</groupId>
+	<groupId>io.github.wingzero0</groupId>
 	<artifactId>ssoclient</artifactId>
 	<packaging>war</packaging>
 
@@ -11,7 +11,7 @@
 	<description>sso client</description>
 
 	<parent>
-		<groupId>kit.personal.sso</groupId>
+		<groupId>io.github.wingzero0</groupId>
 		<artifactId>ssoparent</artifactId>
 		<version>0.12.1-SNAPSHOT</version>
 	</parent>
