@@ -1,11 +1,5 @@
 package io.github.wingzero0.ssoclient.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +21,16 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
-    Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Value("${application.resource.server.role.uri}")
     private String roleUri;
@@ -90,7 +90,7 @@ public class SecurityConfig {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
             mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC"));
 
-            LOG.debug("oidcUserName:" + oidcUser.getName());
+            LOG.debug("oidcUserName:{}", oidcUser.getName());
 
             String[] messages = this.webClient
                     .get()
@@ -100,7 +100,7 @@ public class SecurityConfig {
                     .bodyToMono(String[].class)
                     .block();
             for (String message : messages) {
-                LOG.debug("ROLE:" + message);
+                LOG.debug("ROLE:{}", message);
                 mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + message.toUpperCase()));
             }
 
