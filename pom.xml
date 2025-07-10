@@ -31,6 +31,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>17</java.version>
 		<maven.compiler.release>17</maven.compiler.release>
+		<ci.commit.short.sha>localBuild</ci.commit.short.sha>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

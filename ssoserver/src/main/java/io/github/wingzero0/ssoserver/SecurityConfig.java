@@ -38,9 +38,8 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> {
-            authorizeRequests.requestMatchers("/vendor/**").permitAll();
-            authorizeRequests.requestMatchers("/js/**").permitAll();
-            authorizeRequests.requestMatchers("/css/**").permitAll();
+            authorizeRequests.requestMatchers("/vendor/**", "/js/**", "/css/**").permitAll();
+            authorizeRequests.requestMatchers("/api/version").permitAll();
             authorizeRequests.anyRequest().authenticated();
         }).formLogin(formLogin -> {
             formLogin.loginPage("/login").failureUrl("/login-error").permitAll();

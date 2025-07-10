@@ -30,6 +30,7 @@ public class ResourceServerConfiguration {
                         .requestMatchers("/api/appRole/**").hasAuthority("SCOPE_app_role")
                         .requestMatchers("/api/testScopeRead").hasAuthority("SCOPE_message.read")
                         .requestMatchers("/api/testScopeWrite").hasAuthority("SCOPE_message.write")
+                        .requestMatchers("/api/version").permitAll()
                         .anyRequest().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2
                     .opaqueToken(token -> token.introspectionUri(checkTokenUri)
