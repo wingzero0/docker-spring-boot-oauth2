@@ -34,6 +34,8 @@ public class SecurityConfig {
 
     @Value("${application.resource.server.role.uri}")
     private String roleUri;
+    @Value("${spring.security.oauth2.client.registration.messaging-client-oidc.client-name}")
+    private String primaryClientName;
     @Autowired
     private WebClient webClient;
 
@@ -85,7 +87,12 @@ public class SecurityConfig {
         return (userRequest) -> {
             // Delegate to the default implementation for loading a user
             OidcUser oidcUser = delegate.loadUser(userRequest);
-
+            LOG.debug("clientId:{}", userRequest.getClientRegistration().getClientId());
+            LOG.debug("clientName:{}", userRequest.getClientRegistration().getClientName());
+            String clientName = userRequest.getClientRegistration().getClientName();
+            if (!primaryClientName.equals(clientName)){ // try to handle different provider;
+                return oidcUser;
+            }
             // OAuth2AccessToken accessToken = userRequest.getAccessToken();
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
             mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC"));
