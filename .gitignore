@@ -7,3 +7,5 @@ ssoparent.iml
 /auth-server-sample/
 .DS_Store
 /.idea/
+application-uat.properties
+application-prod.properties
