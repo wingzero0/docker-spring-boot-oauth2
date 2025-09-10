@@ -1,19 +1,20 @@
 # build and test notes
-Build a spring boot oauth server with postgresql db.
+Build a spring boot oauth server with mariadb or postgresql db.
 
-There is a bug in spring-security-oauth2-authorization-server v0.2.3 (or it's dependency) to connect mysql. not sure that is it fixed in later version.
+init schema
+- [mariadb/1.2.7-schema.sql](mariadb/1.2.7-schema.sql)
+- [postgresql/script/init-db.sh](postgresql/script/init-db.sh), for container env initialize.
 
-## docker ide 
-linux container
+## develop and running app
+defualt `application.properties` connect to mariadb; if you run on dev container / gitpod, replace all datasource config in every `application.properties`
 
-    $> docker-composer up -d # create env
-    $> docker-composer start # rerun env
-    $> docker-composer stop # stop env
-    $> docker-composer down # delete env
+```
+spring.datasource.url=jdbc:postgresql://postgresqldb:5432/authorization_server
+spring.datasource.username=postgres
+spring.datasource.password=example
+spring.datasource.driver-class-name=org.postgresql.Driver
+```
 
-visit localhost:9000 for IDE interface, login password "admin"
-
-## running app in docker
 running ssoserver (it is an authenication server) at localhost:8081/auth
 ```bash
 cd ssoserver/npmLib
@@ -32,8 +33,23 @@ mvn spring-boot:run -pl role-server -am
 
 running ssoclient (it is a client server, with server side authentication) at ***127.0.0.1:8080*** . because of redirect-uri in db is marked as 127.0.0.1, it cannot change to localhost. it will input username:password at localhost:8081/auth, and check role through localhost:8082/res
 ```bash
-cp ssoclient/src/main/filters-example.properties ssoclient/src/main/filters-dev.properties
 mvn spring-boot:run -pl ssoclient -am
+```
+
+## package and run war file
+```bash
+cd ssoserver/npmLib && npm ci && npm run postbuild && cd ../../
+mvn clean compile package
+cp role-server/target/*.war role-server.war
+cp ssoserver/target/*.war ssoserver.war
+
+touch application-sso.properties
+# add db connection, server.port, server.servlet.context-path on application-sso.properties to overwrite default value
+java -jar ssoserver.war --spring.profiles.active=sso
+
+touch application-role.properties
+# add db connection, server.port, server.servlet.context-path on application-role.properties to overwrite default value
+java -jar role-server.war --spring.profiles.active=role
 ```
 
 ## testing command
@@ -138,3 +154,4 @@ curl -X POST \
 
 {"access_token":"6e58306a-c371-4aa8-9dac-80083c7aab7f","token_type":"bearer","refresh_token":"d14c9aca-d7ab-49e6-bd05-5705aa6927d6","expires_in":10799,"scope":"read write"}
 ```
+
