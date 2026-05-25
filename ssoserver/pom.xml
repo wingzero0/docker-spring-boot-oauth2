@@ -106,12 +106,19 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 		</profile>
-		<!-- <profile>
-			<id>test</id>
+		<profile>
+			<id>inmemory</id>
 			<properties>
-				<active.profile>test</active.profile>
+				<active.profile>inmemory</active.profile>
 			</properties>
-		</profile> -->
+			<dependencies>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 	<build>
 		<finalName>${project.artifactId}##${project.version}-${active.profile}</finalName>

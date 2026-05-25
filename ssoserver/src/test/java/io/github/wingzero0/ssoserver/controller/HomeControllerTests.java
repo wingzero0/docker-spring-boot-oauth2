@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest(properties = "spring.application.version=0.12.1-SNAPSHOT-test")
-@ActiveProfiles("test")
+@ActiveProfiles("inmemory")
 @AutoConfigureMockMvc
 public class HomeControllerTests {
 	@Autowired
