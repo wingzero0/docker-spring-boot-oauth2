@@ -62,11 +62,14 @@ public class AuthorizationServerConfig {
 	public SecurityFilterChain authorizationServerSecurityFilterChain(
 			HttpSecurity http, RegisteredClientRepository registeredClientRepository,
 			AuthorizationServerSettings authorizationServerSettings) throws Exception {
-		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-				.authorizationEndpoint(
-						authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
-				.oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
+		OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+				OAuth2AuthorizationServerConfigurer.authorizationServer();
+		http
+				.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+				.with(authorizationServerConfigurer, authorizationServer -> authorizationServer
+						.authorizationEndpoint(
+								authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
+						.oidc(Customizer.withDefaults())); // Enable OpenID Connect 1.0
 		http
 				.exceptionHandling(exceptions -> exceptions
 						.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
