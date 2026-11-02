@@ -88,7 +88,9 @@ All data disappears when the processes stop.
 
 The default `application.properties` of `ssoserver` and `role-server` already point to
 `jdbc:mariadb://localhost:3306/authorization_server` with user/password `authorization_server`,
-so the container below matches the configuration:
+so the container below matches the configuration. Their URLs also carry
+`preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true`, so no manual edit is
+needed - see [Time zone contract](#time-zone-contract) for why.
 
 ```bash
 docker run -d --name sso-mariadb -p 3306:3306 \
@@ -159,7 +161,9 @@ docker rm -f sso-mariadb
 
 To use another database server, change `spring.datasource.*` in the module `application.properties`
 or override it on the command line, for example
-`--spring.datasource.url=jdbc:mariadb://db-host:3306/authorization_server`.
+`--spring.datasource.url=jdbc:mariadb://db-host:3306/authorization_server?preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true`.
+Keep the three query options when overriding, otherwise the values written into the `timestamp` columns depend
+on the JVM time zone (see [Time zone contract](#time-zone-contract)).
 For PostgreSQL, use [postgresql/script/init-db.sh](postgresql/script/init-db.sh) (see the
 `.devcontainer` setup) and change the driver/url to `org.postgresql.Driver` /
 `jdbc:postgresql://postgresqldb:5432/authorization_server`.
@@ -232,6 +236,62 @@ mvn test -pl role-server  # single module
   [mariadb/1.5.7-schema.sql](mariadb/1.5.7-schema.sql) is the 1.5.7 upstream script, kept verbatim.
   Remember that it uses `blob` for the token columns - PostgreSQL needs `text` instead, and for MySQL /
   MariaDB the `preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true` JDBC
-  options are recommended to store time instants accurately (see the header of the script).
+  options are required to store time instants accurately (see the header of the script); they are already
+  part of every MariaDB `spring.datasource.url` in this repository, see [Time zone contract](#time-zone-contract).
 - `role-server` and `ssoserver` cannot be deployed twice into the same Tomcat instance; undeploy the old
   version before deploying a new one.
+
+## Time zone contract
+
+The applications store **instants**, never wall-clock values, and the JDBC layer pins both sides of the
+conversion to UTC. The JVM time zone is therefore irrelevant for what ends up in the database: a JVM running
+at UTC-8, UTC+8 or UTC writes the same rows.
+
+| Written by | Java type | Column | Conversion |
+| --- | --- | --- | --- |
+| Spring Authorization Server (`JdbcOAuth2AuthorizationService`, `JdbcRegisteredClientRepository`) | `java.sql.Timestamp.from(Instant)` / `getTimestamp(...).toInstant()` | `timestamp` (upstream DDL) | driver **and** server |
+| Hibernate / JPA (`AppUser.lastModifiedDate`, `AppUserRole.lastModifiedDate`) | `java.util.Date` | `datetime(6)` (MySQL / MariaDB dialect DDL) | driver only |
+| Spring Session (`SPRING_SESSION`) | epoch millis | `BIGINT` | none |
+
+What the three URL options do:
+
+| Option | Effect |
+| --- | --- |
+| `preserveInstants=true` | The driver converts `java.sql.Timestamp` / `java.util.Date` between the instant and a wall clock in `connectionTimeZone`, instead of passing the wall clock through untouched |
+| `connectionTimeZone=UTC` | Pins that wall clock to UTC instead of the JVM default (`LOCAL`), so several JVMs writing to the same database always agree |
+| `forceConnectionTimeZoneToSession=true` | Sets the MariaDB session `time_zone` to `+00:00`, so the server-side conversion of the `timestamp` columns cancels out and `NOW()` / `DEFAULT CURRENT_TIMESTAMP` are UTC |
+
+Without them the round trip still "works" inside a single JVM, because the same shift is applied when
+writing and when reading - which is exactly why the problem is easy to miss. It shows up as soon as a second
+JVM with a different default time zone, a SQL `NOW()` such as
+[mariadb/seed-app-data.sql](mariadb/seed-app-data.sql), or a person reading the raw column is involved: each
+of them is off by the difference between the JVM time zone and the server session time zone. A `timestamp`
+column is converted twice, so it is only self-consistent when `connectionTimeZone` equals the session
+`time_zone`; `datetime(6)` is converted once by the driver, which is why the JPA columns do not depend on the
+session at all.
+
+Notes:
+
+- `@Temporal` is not a fix. On a `java.util.Date` field it only selects the JDBC type (`DATE`, `TIME` or
+  `TIMESTAMP`); the DDL type comes from the dialect, and the Hibernate MySQL / MariaDB dialect maps the
+  `TIMESTAMP` JDBC type to `datetime($p)`. `@Temporal(TemporalType.TIMESTAMP)` therefore changes nothing for
+  this project, and `@Temporal(TemporalType.DATE)` would silently drop the time of day.
+- `datetime(6)` is deliberately kept for the JPA columns: one conversion instead of two, and no 2038 limit.
+  Switching those columns to `timestamp` would add constraints, not accuracy.
+- Do not add `spring.jpa.properties.hibernate.jdbc.time_zone` (`hibernate.jdbc.time_zone`). It stacks a second
+  conversion on top of the driver options instead of replacing them.
+- The H2 `inmemory` / `test` profiles cannot catch this class of bug (H2 `TIMESTAMP` performs no session-zone
+  conversion), so any change here has to be verified against MariaDB.
+
+Verify a running setup:
+
+```bash
+docker exec -i sso-mariadb mariadb -uroot -proot authorization_server \
+  -e 'SELECT @@system_time_zone, @@session.time_zone, NOW(), UTC_TIMESTAMP();'
+# @@session.time_zone must be +00:00 and NOW() must equal UTC_TIMESTAMP()
+```
+
+Then create a user through the API and compare the returned `lastModifiedDate` with
+`SELECT id, last_modified_date FROM app_user ORDER BY id DESC LIMIT 1;` - both must denote the same instant.
+Starting the application with a different JVM time zone (for example `-Duser.timezone=America/Los_Angeles`)
+must not change the stored value.
