@@ -1,7 +1,7 @@
 # docker-spring-boot-oauth2
 
 SSO demo built with Spring Boot 3.5.7 and Spring Authorization Server 1.5.7 (OAuth2 / OpenID Connect).
-Requires **Java 17+** and **Maven 3.9+**.
+Requires **Java 17+**, **Maven 3.9+**, and **jq** (for the token commands below).
 
 | module | description | url |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Check that both are up (the resource server endpoint is public):
 
 ```bash
 curl -s http://localhost:8082/res/api/version
-# {"version":"0.12.1-SNAPSHOT-localBuild","profile":"inmemory"}
+# {"version":"0.13.0-SNAPSHOT-localBuild","profile":"inmemory"}
 ```
 
 Get an access token with the `client_credentials` grant (the in-memory profile registers the
@@ -39,7 +39,7 @@ client `messaging-client2` / `secret` automatically):
 ```bash
 TOKEN=$(curl -s -u messaging-client2:secret \
   -d 'grant_type=client_credentials&scope=app_role' \
-  http://localhost:8087/auth/oauth2/token | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+  http://localhost:8087/auth/oauth2/token | jq -r '.access_token')
 
 # roles of every user of this client
 curl -s -H "Authorization: Bearer $TOKEN" http://localhost:8082/res/api/appRoles
@@ -143,7 +143,7 @@ Same commands as Quick start A, but the authorization server is on `8081`:
 ```bash
 TOKEN=$(curl -s -u messaging-client2:secret \
   -d 'grant_type=client_credentials&scope=app_role' \
-  http://localhost:8081/auth/oauth2/token | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+  http://localhost:8081/auth/oauth2/token | jq -r '.access_token')
 
 curl -s -H "Authorization: Bearer $TOKEN" http://localhost:8082/res/api/appRoles
 curl -s -H "Authorization: Bearer $TOKEN" http://localhost:8082/res/api/appRole/john
@@ -173,8 +173,8 @@ cd ssoserver/npmLib && npm ci && npm run postbuild && cd ../../
 mvn clean package                # dev profile is the default -> *-dev.war
 mvn clean package -Pinmemory     # -> *-inmemory.war
 
-java -jar "ssoserver/target/ssoserver##0.12.1-SNAPSHOT-dev.war"
-java -jar "role-server/target/role-server##0.12.1-SNAPSHOT-dev.war"
+java -jar "ssoserver/target/ssoserver##0.13.0-SNAPSHOT-dev.war"
+java -jar "role-server/target/role-server##0.13.0-SNAPSHOT-dev.war"
 ```
 
 The file name embeds the Maven profile (`${active.profile}`), which is also the Spring profile written
