@@ -28,6 +28,7 @@ public class ResourceServerConfiguration {
                     authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/appRole").hasAuthority("SCOPE_app_role")
                         .requestMatchers("/api/appRole/**").hasAuthority("SCOPE_app_role")
+                        .requestMatchers("/api/appRoles").hasAuthority("SCOPE_app_role")
                         .requestMatchers("/api/testScopeRead").hasAuthority("SCOPE_message.read")
                         .requestMatchers("/api/testScopeWrite").hasAuthority("SCOPE_message.write")
                         .requestMatchers("/api/version").permitAll()
