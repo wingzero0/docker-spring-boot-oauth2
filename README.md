@@ -105,12 +105,15 @@ until docker exec sso-mariadb mariadb-admin ping -uroot -proot --silent; do slee
 ### 2. Create the OAuth2 tables
 
 ```bash
-docker exec -i sso-mariadb mariadb -uroot -proot authorization_server < mariadb/init-db.sql
+docker exec -i sso-mariadb mariadb -uroot -proot authorization_server < mariadb/1.5.7-schema.sql
 ```
 
-[mariadb/init-db.sql](mariadb/init-db.sql) only creates the three Spring Authorization Server tables,
-because they are not mapped by JPA. The `app_user` / `app_user_role` / `app_user_seq` tables are created
-by Hibernate when the applications start (dev profile, `spring.jpa.hibernate.ddl-auto=update`).
+[mariadb/1.5.7-schema.sql](mariadb/1.5.7-schema.sql) is the upstream Spring Authorization Server 1.5.7
+schema (the three `oauth2-*-schema.sql` files of the
+`spring-security-oauth2-authorization-server` jar, concatenated as is). It only creates the three Spring
+Authorization Server tables, because they are not mapped by JPA. The
+`app_user` / `app_user_role` / `app_user_seq` tables are created by Hibernate when the applications start
+(dev profile, `spring.jpa.hibernate.ddl-auto=update`).
 
 ### 3. Start the applications
 
@@ -225,7 +228,10 @@ mvn test -pl role-server  # single module
 
 ## Notes
 
-- The schema of the OAuth2 tables is unchanged between Spring Authorization Server 1.2.7 and 1.5.7
-  ([mariadb/1.2.7-schema.sql](mariadb/1.2.7-schema.sql) is kept as the reference script).
+- The schema of the OAuth2 tables is unchanged between Spring Authorization Server 1.2.7 and 1.5.7;
+  [mariadb/1.5.7-schema.sql](mariadb/1.5.7-schema.sql) is the 1.5.7 upstream script, kept verbatim.
+  Remember that it uses `blob` for the token columns - PostgreSQL needs `text` instead, and for MySQL /
+  MariaDB the `preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true` JDBC
+  options are recommended to store time instants accurately (see the header of the script).
 - `role-server` and `ssoserver` cannot be deployed twice into the same Tomcat instance; undeploy the old
   version before deploying a new one.
